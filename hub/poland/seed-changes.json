@@ -1,0 +1,28 @@
+{
+  "changes": [
+    {
+      "id": "chg_45ac9b5b4fa0230b8377",
+      "title": "CUKR fee reminder",
+      "summary": "Applicants must pay correct amount and use correct account numbers when filing CUKR requests; incorrect payment hinders processing. (Listed 2026-10-27 on the source page.)",
+      "url": "https://migrant.wsc.mazowieckie.pl/komunikaty",
+      "detectedAt": "2026-10-29T19:27:13.787Z",
+      "sample": false
+    },
+    {
+      "id": "chg_8926b583fb199288a73d",
+      "title": "Informative Saturday at USC Mazowiecki",
+      "summary": "Next event on 24 October 2026, 8:00–15:00 at ul. Marszałkowska 3/5, Warsaw; part of FAMI project offering info to foreigners.",
+      "url": "https://migrant.wsc.mazowieckie.pl/komunikaty",
+      "detectedAt": "2026-10-29T19:27:13.787Z",
+      "sample": false
+    },
+    {
+      "id": "chg_86250eafe3ffc814d3d0",
+      "title": "Legal stay confirmation replaces passport stamp",
+      "summary": "New certificate confirms submitted residence permit application and legal stay; previously only passport stamp served this purpose. (Listed 2026-10-19 on the source page.)",
+      "url": "https://migrant.wsc.mazowieckie.pl/komunikaty",
+      "detectedAt": "2026-10-29T19:27:13.787Z",
+      "sample": false
+    }
+  ]
+}

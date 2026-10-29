@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["esnext"],
+    "types": ["@cloudflare/workers-types", "node"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "paths": { "@/*": ["../src/*"] }
+  },
+  "include": ["./*.ts", "../src/lib/server/**/*.ts", "../open-next.config.ts"]
+}

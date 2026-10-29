@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "settla-app",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "settla-app" }],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "settla-db", "database_id": "a449449f-4d26-45c0-8f01-1524ff7dc20c", "migrations_dir": "migrations" }
+  ],
+  "kv_namespaces": [{ "binding": "CACHE", "id": "10ddcc50a6814f31b753e54cb74cb58f" }],
+  "r2_buckets": [{ "binding": "BLOBS", "bucket_name": "settla-blobs", "jurisdiction": "eu" }],
+  "durable_objects": { "bindings": [{ "name": "USER_DO", "class_name": "UserDO" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["UserDO"] }],
+  "workflows": [
+    { "name": "settla-prepare-fallback", "binding": "PREPARE_FALLBACK", "class_name": "PrepareFallback" },
+    { "name": "settla-letter-pipeline", "binding": "LETTER_PIPELINE", "class_name": "LetterPipeline" },
+    { "name": "settla-nightly-watch", "binding": "NIGHTLY_WATCH", "class_name": "NightlyWatch" }
+  ],
+  "triggers": { "crons": ["0 2 * * *"] },
+  "vars": {
+    "APP_ENV": "preview",
+    "DODO_ENV": "test",
+    "DODO_PRODUCT_CASE_PASS": "pdt_0Nqo8xdjjAa1SQUGHKfZ7",
+    "DODO_PRODUCT_CREDITS_10": "pdt_0Nqo8xo9gXhejHssrLeSZ",
+    "DODO_PRODUCT_CREDITS_25": "pdt_0Nqo8y23gjaWIvquo4g3U",
+    "DODO_PRODUCT_FAMILY": "pdt_0Nqo8y7aeu9duJkiA3Wmu"
+  }
+}

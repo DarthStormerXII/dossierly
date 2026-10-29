@@ -1,0 +1,38 @@
+/* Public pages: landing, pricing, countries, limits, legal. */
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 900px) { .wrap { padding: 0 32px; } }
+.site-header { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.site-header .wrap { min-height: 60px; }
+.site-nav { display: none; gap: 24px; font-weight: 600; font-size: 0.95rem; }
+.site-nav a { text-decoration: none; color: var(--ink-2); }
+.site-nav a:hover { color: var(--ink); }
+@media (min-width: 860px) { .site-nav { display: flex; } }
+.site-footer { border-top: 1px solid var(--line); margin-top: 64px; padding: 32px 0 48px; background: var(--surface); }
+.footer-grid { display: grid; gap: 24px; }
+@media (min-width: 720px) { .footer-grid { grid-template-columns: 1fr auto; } }
+.footer-links { display: grid; grid-template-columns: repeat(2, minmax(120px, auto)); gap: 10px 32px; font-weight: 600; }
+.footer-links a { color: var(--ink-2); text-decoration: none; }
+.footer-links a:hover { color: var(--ink); text-decoration: underline; }
+
+.section { padding: 56px 0 8px; }
+@media (min-width: 900px) { .section { padding: 88px 0 8px; } }
+.kicker { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 10px; display: block; }
+.section-head { max-width: 720px; margin-bottom: 28px; }
+.section-head p { color: var(--ink-2); font-size: 1.05rem; }
+.doc-page { max-width: 760px; margin: 0 auto; padding: 40px 16px 24px; }
+.doc-page h2 { margin-top: 1.6em; }
+.doc-page h3 { margin-top: 1.2em; }
+.doc-page li { margin: 0.3em 0; }
+.doc-page table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 10px 0 18px; display: block; overflow-x: auto; }
+.doc-page th, .doc-page td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.doc-page th { font-weight: 700; background: var(--surface-2); }
+.cov-list { list-style: none; padding: 0; display: grid; gap: 12px; }
+.cov-grid { display: grid; gap: 12px; }
+@media (min-width: 720px) { .cov-grid { grid-template-columns: 1fr 1fr; } }
+.cov-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.cov-quote { margin: 10px 0 0; padding: 6px 0 6px 12px; border-left: 3px solid var(--official); font-size: 0.9rem; color: var(--ink-2); }
+.cov-table td { vertical-align: top; }
+.src-list { list-style: none; padding: 0; display: grid; gap: 0; }
+.src-list li { display: grid; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 720px) { .src-list li { grid-template-columns: 1fr auto; align-items: center; gap: 16px; } }
+.src-list a { font-weight: 600; overflow-wrap: anywhere; }
