@@ -52,7 +52,7 @@ export function LetterPicker({ sample, onPages, onError }: { sample: boolean; fr
       <input ref={pdf} type="file" accept="application/pdf,image/*" hidden onChange={(e) => void take(e.target.files?.[0])} aria-label="Letter PDF or image" />
       {sample && (
         <div className="sample-letter row">
-          <span className="stamp">SAMPLE</span>
+          <span className="stamp">Sample</span>
           <span className="grow small">Arjun&apos;s letter from the Mazowiecki office: a <i>wezwanie</i> about missing documents.</span>
           <button className="btn btn-primary btn-small" onClick={() => void loadSample()} disabled={preparing}>Use the sample letter</button>
         </div>

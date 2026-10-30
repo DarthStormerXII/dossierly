@@ -2,8 +2,8 @@
 
 **A personal AI caseworker for life abroad.** Each person gets their own private AI agent that remembers their whole case. It prepares them for official appointments, interprets while they talk to the official, reads the letters that follow and counts the deadlines. Poland is the first supported country.
 
-- Live demo: **https://dossierly.pages.dev** (no login; start with Arjun's sample case, or your own)
-- Judges: the code **`DOSSIERLYJUDGES`** unlocks a free Case Pass at checkout (the first letter is free anyway)
+- Live demo: **https://dossierly.pages.dev** (passkey account, no email or password; start with Arjun's sample case, or your own)
+- Judges: sign up (passkey or "this device only"), choose Plus on the plan step and enter **`DOSSIERLYJUDGES`**: checkout total becomes $0. The free tier already covers three letters, preparation and interpreting.
 - Built for the Nebius × NVIDIA Global AI Hackathon, Personal AI track, during the hackathon period
 
 Dossierly interprets and explains. It never gives legal or medical advice, and says so on screen.
@@ -46,7 +46,7 @@ Token Factory features in use: structured JSON output with zod validation and on
 
 **Tavily** Search, Extract and Map, restricted to official Polish domains, power Prepare and the official-pages watch. Every result is cached by query or URL, there is a daily credit cap, and nothing calls Tavily on page load. The watch runs as a Cloudflare cron Workflow: Tavily, then a Lightning summary of any change. It found the real 19 Oct 2026 announcement that a certificate now replaces the passport stamp.
 
-**Dodo Payments** is the merchant of record: Case Pass 149 zł once (one residence case, 18 months), credits for one-off letters and appointments, BLIK, Przelewy24 and cards.
+**Dodo Payments** is the merchant of record. Two tiers, priced in US dollars with local currency and methods (BLIK, Przelewy24, cards) at checkout: Free (three letters, appointment preparation, live interpreting) and Dossierly Plus, $39 once for one residence case over 18 months, with a $15 family add-on. Nothing renews.
 
 ## Privacy you can check
 

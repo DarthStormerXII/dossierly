@@ -1,46 +1,32 @@
 import Link from "next/link";
-import { Icon } from "@/components/Icon";
 
-const NEXT = [
-  { name: "Germany", local: "Deutschland" },
-  { name: "France", local: "France" },
+const COUNTRIES = [
+  { code: "PL", name: "Poland", sub: "Mazowiecki office, Warsaw", live: true },
+  { code: "DE", name: "Germany", sub: "Not available yet", live: false },
+  { code: "FR", name: "France", sub: "Not available yet", live: false },
 ];
 
-/** Countries: Poland live, the next two named, the rule for adding more. */
+/** Countries, in Beside's "Integrates with your tools" pattern: a dark pill, then a quiet grid. */
 export function Countries() {
   return (
-    <section className="lp-section lp-wrap" aria-labelledby="countries-h">
-      <div className="lp-head lp-head-row" data-reveal>
-        <div>
-          <span className="lp-kicker">Countries</span>
-          <h2 id="countries-h">Poland first. Countries enabled one by one.</h2>
-        </div>
-        <p>A country goes live only when its offices, letter types and deadline rules are covered from their sources.</p>
-      </div>
-      <div className="lp-countries">
-        <Link href="/countries" className="lp-country lp-country-live" data-reveal>
-          <div className="lp-country-top">
-            <span className="lp-chip-ui lp-chip-inv"><span className="lp-live" aria-hidden="true" />Live</span>
-            <span className="lp-icon-btn lp-icon-btn-light" aria-hidden="true"><Icon name="arrow" size={18} /></span>
-          </div>
-          <div>
-            <span className="lp-country-local" lang="pl">Polska</span>
-            <b className="lp-country-name">Poland</b>
-            <span className="lp-country-sub">Temporary residence and work · Mazowieckie voivodeship, Warsaw</span>
-          </div>
-        </Link>
-        {NEXT.map((c) => (
-          <div key={c.name} className="lp-country" data-reveal>
-            <div className="lp-country-top">
-              <span className="lp-chip-ui">Next</span>
-            </div>
-            <div>
-              <span className="lp-country-local">{c.local}</span>
-              <b className="lp-country-name">{c.name}</b>
-              <span className="lp-country-sub">Same caseworker, new office playbooks and deadline rules. Not available yet.</span>
-            </div>
-          </div>
-        ))}
+    <section className="lp-sec" aria-labelledby="countries-h">
+      <div className="lp-wrap">
+        <header className="lp-head-l">
+          <h2 id="countries-h" className="lp-h2" data-sweep>Poland first, then country by country</h2>
+          <p className="lp-body">A country goes live only when its offices, letter types and deadline rules are covered from their sources.</p>
+          <Link href="/countries" className="lp-btn lp-btn-dark lp-btn-sm">See coverage</Link>
+        </header>
+        <ul className="lp-countries">
+          {COUNTRIES.map((c) => (
+            <li key={c.code}>
+              <span className="lp-country-code" aria-hidden="true">{c.code}</span>
+              <div>
+                <b>{c.name} {c.live ? <span className="lp-tag lp-tag-live">Live</span> : <span className="lp-tag">Next</span>}</b>
+                <span>{c.sub}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );

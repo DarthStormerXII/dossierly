@@ -76,7 +76,7 @@ export function Checkout({ suggest }: { suggest?: "plus" }) {
         <span id="consent-text" className="small">For Plus: I want access to start straight away and understand I lose my 14-day withdrawal right once it starts.</span>
       </label>
       <form className="code-row" onSubmit={redeem} aria-label="Redeem a code">
-        <input className="input mono" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Have a code?" aria-label="Code" autoComplete="off" maxLength={40} />
+        <input className="input" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Have a code?" aria-label="Code" autoComplete="off" maxLength={40} />
         <button className="btn" disabled={!code.trim() || busy !== null}>{busy === "redeem" ? "Checking…" : "Apply"}</button>
       </form>
       {msg && <div className={msg.ok ? "notice notice-calm" : "error-box"} role="status">{msg.text}</div>}

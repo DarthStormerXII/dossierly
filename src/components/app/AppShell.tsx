@@ -79,7 +79,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       <header className="app-header">
         <Link href="/" className="logo-link" aria-label="Dossierly home"><Logo size={26} /></Link>
         <span className="chip chip-ai" title="You are using an AI system">AI</span>
-        {dossier?.sample && <span className="stamp" title="Fictional sample case">SAMPLE</span>}
+        {dossier?.sample && <span className="stamp" title="Fictional sample case">Sample</span>}
         <span className="grow" />
         <AgentBadge />
         <button className="btn btn-ghost btn-small signout" onClick={() => void leave()} title="Sign out">Sign out</button>

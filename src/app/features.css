@@ -26,7 +26,7 @@
 .link-card { border-color: var(--official-line); }
 .related { list-style: none; padding: 0; display: grid; gap: 6px; }
 .related li { padding: 8px 12px; border-radius: 10px; background: var(--official-soft); }
-.related .mono { color: var(--official); font-weight: 700; margin-right: 6px; }
+.related .mono { color: var(--official); font-weight: 600; margin-right: 6px; }
 .still-open { margin-top: 6px; display: grid; gap: 4px; }
 .calc { margin-top: 8px; }
 .calc-steps { margin-top: 8px; display: grid; gap: 6px; font-size: 0.92rem; padding-left: 1.3em; }
@@ -55,7 +55,7 @@
 .cite-open { margin-top: 8px; padding: 10px 12px; border-left: 3px solid var(--official); background: var(--official-soft); border-radius: 0 8px 8px 0; font-size: 0.9rem; }
 .phrases { display: grid; gap: 10px; }
 .phrase { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
-.phrase .pl { font-weight: 700; font-size: 1.05rem; }
+.phrase .pl { font-weight: 600; font-size: 1.05rem; }
 .change { border-left: 4px solid var(--official); padding: 12px 14px; background: var(--surface); border-radius: 0 12px 12px 0; }
 
 /* Privacy */

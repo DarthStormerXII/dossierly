@@ -1,58 +1,48 @@
-/** The problem, told through one real case shape: long, in Polish, and run by deadlines. */
-const MILESTONES = [
-  { at: 0, label: "Applied" },
-  { at: 27, label: "Fingerprints" },
-  { at: 37, label: "Wezwanie" },
-  { at: 100, label: "Decision" },
+const JOBS = [
+  { t: "Getting ready for the office", s: "Which documents, which rules, what changed this month" },
+  { t: "Understanding the counter", s: "A conversation in Polish that decides your case" },
+  { t: "Answering letters on time", s: "A wezwanie gives you 14 days from delivery" },
 ];
 
+/** The problem: three jobs a newcomer carries, one stat for how long they carry them. */
 export function Problem() {
   return (
-    <section className="lp-section lp-wrap" aria-labelledby="problem-h">
-      <div className="lp-dark">
-        <div className="lp-head lp-head-dark" data-reveal>
-          <span className="lp-kicker">The problem</span>
-          <h2 id="problem-h">A residence case in Poland is long, in Polish, and run by deadlines.</h2>
+    <section className="lp-sec lp-sec-lg" aria-labelledby="problem-h">
+      <div className="lp-wrap lp-problem">
+        <div className="lp-problem-copy">
+          <p className="lp-eyebrow">The problem</p>
+          <h2 id="problem-h" className="lp-h2" data-sweep>Three jobs stand between you and your new life.</h2>
+          <p className="lp-body">
+            A residence-and-work permit in Poland means a case that runs for more than a year, talks at the counter in
+            Polish, and letters with deadlines counted from the day they arrive. Miss one and the application is left
+            unexamined. Dossierly carries all three.
+          </p>
+          <figure className="lp-stat" data-reveal>
+            <p className="lp-stat-n">394 days</p>
+            <p className="lp-stat-l">Average case at the Mazowiecki office, 2026</p>
+            <figcaption>Reply to Sejm interpellation 18089. Translation apps forget each sentence; agencies remember the case but cost thousands of złoty.</figcaption>
+          </figure>
         </div>
-
-        <div className="lp-prob-grid">
-          <article className="lp-prob lp-prob-wide" data-reveal>
-            <p className="lp-stat"><span>394</span> days</p>
-            <p className="lp-prob-text">
-              The average residence case at the Mazowiecki voivodeship office in Warsaw in 2026. More than a year of
-              appointments and letters to keep straight.
-            </p>
-            <div className="lp-timeline" aria-hidden="true">
-              <div className="lp-tl-bar"><span className="lp-tl-fill" /></div>
-              {MILESTONES.map((m) => (
-                <span key={m.label} className="lp-tl-mark" style={{ left: `${m.at}%` }}><i />{m.label}</span>
-              ))}
+        <ol className="lp-jobs">
+          {JOBS.map((j, i) => (
+            <li key={j.t} className="lp-job" data-reveal>
+              <span className="lp-job-n">{i + 1}</span>
+              <div className="lp-job-t">
+                <h3>{j.t}</h3>
+                <p>{j.s}</p>
+              </div>
+              <span className="lp-tag">Handled by Dossierly</span>
+            </li>
+          ))}
+          <li className="lp-job lp-job-you" data-reveal>
+            <span className="lp-job-n">4</span>
+            <div className="lp-job-t">
+              <h3>Building your life here</h3>
+              <p>The work, the flat, the people you came for</p>
             </div>
-            <p className="lp-src">Source: reply to Sejm interpellation 18089</p>
-          </article>
-
-          <article className="lp-prob" data-reveal>
-            <h3>The conversation happens in Polish, at the counter.</h3>
-            <div className="lp-bubble" lang="pl">„Przyjdzie pismo. Proszę pilnować terminu.”</div>
-            <p className="lp-prob-text">A few minutes, a queue behind you, and the details that decide your case.</p>
-          </article>
-
-          <article className="lp-prob" data-reveal>
-            <h3>A <i lang="pl">wezwanie</i> gives you 14 days from delivery.</h3>
-            <blockquote className="lp-quote" lang="pl">
-              „…w terminie <mark>14 dni od dnia doręczenia</mark> niniejszego wezwania…”
-            </blockquote>
-            <p className="lp-prob-text">Miss it and the application is left unexamined.</p>
-          </article>
-
-          <article className="lp-prob" data-reveal>
-            <h3>Help either forgets, or costs a fortune.</h3>
-            <dl className="lp-vs">
-              <div><dt>Translation apps</dt><dd>One sentence at a time, then they forget everything.</dd></div>
-              <div><dt>Agencies</dt><dd>Remember the case, and cost thousands of złoty.</dd></div>
-            </dl>
-          </article>
-        </div>
+            <span className="lp-tag lp-tag-dark">Yours again</span>
+          </li>
+        </ol>
       </div>
     </section>
   );

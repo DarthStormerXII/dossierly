@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Sans, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "./site.css";
 import "./landing.css";
@@ -7,7 +7,7 @@ import "./app.css";
 import "./features.css";
 import "./meet.css";
 
-const text = Instrument_Sans({ subsets: ["latin", "latin-ext"], variable: "--font-text", display: "swap" });
+const text = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-text", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin", "latin-ext"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
@@ -22,8 +22,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f6f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#111315" },
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#121110" },
   ],
 };
 

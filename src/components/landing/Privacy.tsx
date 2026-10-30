@@ -1,90 +1,73 @@
 import Link from "next/link";
-import { Icon, type IconName } from "@/components/Icon";
-
-const POINTS: { icon: IconName; t: string; d: string }[] = [
-  { icon: "shield", t: "One private agent per person", d: "Your agent runs in its own NVIDIA NemoClaw / OpenShell sandbox and keeps a masked memory of your case." },
-  { icon: "lock", t: "A restricted network policy", d: "The published policy allows only the official sites, Tavily and the app. Everything else is denied." },
-  { icon: "file", t: "A privacy ledger", d: "Every model call and every network call your agent made, hash-chained, from OpenShell's own audit log." },
-  { icon: "case", t: "Encrypted on your device", d: "The case lives on your phone, encrypted with AES-GCM. With a passkey that supports PRF, the key comes from the passkey." },
-];
-
-const MASKS = [
-  { real: "Arjun Raman", token: "[NAME_1]" },
-  { real: "WSC-II-P.6151.48213.2026", token: "[CASE_1]" },
-  { real: "ul. Grzybowska 12/4", token: "[ADDRESS_1]" },
-];
+import { Icon } from "@/components/Icon";
 
 const LEDGER = [
-  { k: "Model", what: "Nemotron 3.5 Super VL · letter read", h: "9c1e" },
-  { k: "Network", what: "migrant.wsc.mazowieckie.pl · allowed", h: "4a07" },
-  { k: "Network", what: "api.tavily.com · allowed", h: "e25b" },
-  { k: "Model", what: "Nemotron 3 Ultra · linked to 18 Sep", h: "71d3" },
+  { t: "Super VL · letter reading", s: "store: false · 7:13 PM" },
+  { t: "migrant.wsc.mazowieckie.pl", s: "allowed by policy · 7:12 PM" },
+  { t: "an unknown host", s: "denied by policy · 7:12 PM" },
 ];
 
-/** Privacy section: honest wording, with the receipts drawn as UI. */
+/** Privacy, Beside's "It asks first" pattern: three bordered cards, each with a small proof inside. */
 export function Privacy() {
   return (
-    <section className="lp-section lp-wrap" id="privacy" aria-labelledby="privacy-h">
-      <div className="lp-priv">
-        <div className="lp-priv-copy" data-reveal>
-          <span className="lp-kicker">Private by design, verifiable</span>
-          <h2 id="privacy-h">We don&apos;t ask you to trust us. We show you the receipts.</h2>
-          <p className="lp-priv-lede">
-            Your personal identifiers are masked before any model call and restored in the answer. Your agent still
-            sees the masked case as plain text while it works, and we say so.
-          </p>
-          <ul className="lp-priv-list">
-            {POINTS.map((p) => (
-              <li key={p.t}>
-                <span className="lp-icon-btn" aria-hidden="true"><Icon name={p.icon} size={20} /></span>
-                <div><b>{p.t}</b><span>{p.d}</span></div>
-              </li>
-            ))}
-          </ul>
-          <Link href="/limits" className="lp-textlink">Read the published limitations <Icon name="arrow" size={16} /></Link>
-        </div>
-
-        <div className="lp-priv-visual" data-reveal>
-          <div className="lp-mock lp-mask" aria-label="Identifiers masked before any model call">
-            <span className="lp-mini-label">Before any model call</span>
-            <ul>
-              {MASKS.map((m) => (
-                <li key={m.token}>
-                  <s>{m.real}</s>
-                  <Icon name="arrow" size={14} />
-                  <code>{m.token}</code>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lp-mock lp-ledger" aria-label="Privacy ledger excerpt">
-            <div className="lp-mock-head">
-              <span className="lp-mini-label">Privacy ledger · sample</span>
-              <span className="lp-pill-sm lp-pill-ok"><Icon name="check" size={12} /> Chain intact</span>
+    <section className="lp-sec" aria-labelledby="privacy-h">
+      <div className="lp-wrap">
+        <header className="lp-head-l">
+          <h2 id="privacy-h" className="lp-h2"><span data-sweep>Private by design</span><span className="lp-h2-muted">and you can check it</span></h2>
+        </header>
+        <div className="lp-trio">
+          <article className="lp-trio-card" data-reveal>
+            <h3>Its own sandbox</h3>
+            <p>Every person gets their own agent in an NVIDIA NemoClaw sandbox on OpenShell, with a restricted network policy we publish.</p>
+            <div className="lp-trio-well">
+              <div className="lp-ui">
+                <div className="lp-ui-head"><Icon name="shield" size={15} /> Network policy · restricted</div>
+                <div className="lp-ui-body">
+                  <ul className="lp-ui-list">
+                    <li className="is-ok"><span className="lp-ui-tick" aria-hidden="true"><Icon name="check" size={12} /></span>Official Polish sites</li>
+                    <li className="is-ok"><span className="lp-ui-tick" aria-hidden="true"><Icon name="check" size={12} /></span>Tavily and the app</li>
+                    <li className="is-miss"><span className="lp-ui-tick" aria-hidden="true">×</span>Everything else is denied</li>
+                  </ul>
+                </div>
+              </div>
             </div>
-            <ol>
-              {LEDGER.map((l) => (
-                <li key={l.h}>
-                  <span className={`lp-ledger-k${l.k === "Model" ? " is-model" : ""}`}>{l.k}</span>
-                  <span className="lp-ledger-what">{l.what}</span>
-                  <code className="lp-ledger-h">#{l.h}</code>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="lp-mock lp-policy" aria-label="Network policy summary">
-            <span className="lp-mini-label">Network policy · dossierly-restricted</span>
-            <div className="lp-policy-rows">
-              <span className="lp-chip-ui lp-chip-allow">Official sites</span>
-              <span className="lp-chip-ui lp-chip-allow">Tavily</span>
-              <span className="lp-chip-ui lp-chip-allow">The app</span>
-              <span className="lp-chip-ui lp-chip-deny">Everything else · denied</span>
+          </article>
+          <article className="lp-trio-card" data-reveal>
+            <h3>Masked before any model call</h3>
+            <p>PESEL, passport and case numbers, names and addresses are replaced before a model sees them, then restored in the answer.</p>
+            <div className="lp-trio-well">
+              <div className="lp-ui">
+                <div className="lp-ui-head"><Icon name="lock" size={15} /> What the model sees</div>
+                <div className="lp-ui-body">
+                  <p className="lp-mask">Applicant <mark>[NAME_1]</mark>, passport <mark>[PASSPORT_1]</mark>, case <mark>[CASE_1]</mark>, asks about the wezwanie of 27 Oct.</p>
+                  <div className="lp-ui-btns" aria-hidden="true">
+                    <span className="lp-ui-btn lp-ui-btn-dark"><Icon name="lock" size={13} /> Encrypted on this device</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <code className="lp-sha">sha256 2f140afa…f6ff70</code>
-          </div>
+          </article>
+          <article className="lp-trio-card" data-reveal>
+            <h3>A ledger you can read</h3>
+            <p>Every model call and every connection your agent made, from OpenShell&apos;s own audit log, hash-chained.</p>
+            <div className="lp-trio-well">
+              <div className="lp-ui">
+                <div className="lp-ui-head"><Icon name="file" size={15} /> Privacy ledger · today</div>
+                <div className="lp-ui-body">
+                  <ul className="lp-ledger">
+                    {LEDGER.map((l) => (
+                      <li key={l.t}><b>{l.t}</b><span>{l.s}</span></li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
+        <p className="lp-fine">
+          Your case lives on your device, encrypted with AES-GCM. Nebius does not train on customer data. What we
+          cannot promise yet is on <Link href="/limits" className="lp-ulink">the limits page</Link>.
+        </p>
       </div>
     </section>
   );

@@ -1,68 +1,70 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
-import { Icon } from "@/components/Icon";
-import { PhotoCard } from "./Photo";
+import { HeroChip } from "./HeroChip";
+import { HeroMock } from "./HeroMock";
 
-const TICKS = Array.from({ length: 14 }, (_, i) => i + 1);
+const CX = 720;
+const CY = 716;
+const R = 700;
+/** Radial ticks inside the arc, from far left to far right. */
+const TICKS = [-90, -72, -56, -42, -28, -14, 0, 14, 28, 42, 56, 72, 90].map((deg) => {
+  const a = (deg * Math.PI) / 180;
+  const r1 = deg === 0 ? 532 : 540;
+  const r2 = 580;
+  const p = (r: number) => [CX + r * Math.sin(a), CY - r * Math.cos(a)].map((n) => Math.round(n * 10) / 10);
+  const [x1, y1] = p(r1);
+  const [x2, y2] = p(r2);
+  return { deg, x1, y1, x2, y2 };
+});
 
-/** Hero: the promise on the left, the sample case living on top of a Warsaw street on the right. */
+/** The dotted dial behind the hero: a slow sweep of coloured dots travels along it. */
+function Dial() {
+  return (
+    <svg className="lp-dial" viewBox="0 0 1440 720" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="lp-dial-g" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stopColor="#498fff" stopOpacity="0" />
+          <stop offset="0.45" stopColor="#498fff" />
+          <stop offset="0.75" stopColor="#ff7a7a" />
+          <stop offset="1" stopColor="#ffbc74" />
+        </linearGradient>
+      </defs>
+      <circle className="lp-dial-dots" cx={CX} cy={CY} r={R} />
+      {TICKS.map((t) => (
+        <line key={t.deg} className={`lp-dial-tick${t.deg === 0 ? " is-top" : ""}`} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2} />
+      ))}
+      <line className="lp-dial-base" x1="100" y1={CY} x2="140" y2={CY} />
+      <line className="lp-dial-base" x1="1300" y1={CY} x2="1340" y2={CY} />
+      <g className="lp-dial-sweep">
+        <path d={`M ${CX - R * Math.sin(0.2)} ${CY - R * Math.cos(0.2)} A ${R} ${R} 0 0 1 ${CX} ${CY - R}`} className="lp-dial-trail" stroke="url(#lp-dial-g)" />
+        <circle cx={CX} cy={CY - R} r="4" className="lp-dial-head" />
+      </g>
+    </svg>
+  );
+}
+
+/** Hero: centred promise, the two ways in, then one large view of Arjun's case. */
 export function Hero() {
   return (
-    <section className="lp-hero lp-wrap" aria-labelledby="hero-h">
-      <div className="lp-hero-copy" data-reveal>
-        <span className="lp-eyebrow"><span className="lp-dot" aria-hidden="true" />Now in Poland · Mazowieckie</span>
-        <h1 id="hero-h">A caseworker for your life abroad.</h1>
-        <p className="lp-lede">
-          Dossierly gives you a private AI agent that remembers your whole residence case. It prepares you for the
-          office, interprets at the counter, reads the letters that follow and counts every deadline.
+    <section className="lp-hero" aria-labelledby="hero-h">
+      <Dial />
+      <div className="lp-wrap lp-hero-in">
+        <HeroChip />
+        <h1 id="hero-h" className="lp-hero-title">A caseworker for your life abroad</h1>
+        <p className="lp-hero-sub">
+          Your own private AI agent remembers your whole residence case. It prepares you for the office, interprets at
+          the counter, reads the letters that follow and counts every deadline.
         </p>
-        <div className="lp-ctas">
-          <Link className="lp-btn lp-btn-dark" href="/signup">
-            Get started free <span className="lp-btn-ic" aria-hidden="true"><Icon name="arrow" size={18} /></span>
-          </Link>
-          <Link className="lp-btn lp-btn-light" href="/signup?start=sample">See the sample case</Link>
+        <div className="lp-hero-ctas">
+          <Link className="lp-btn lp-btn-dark" href="/signup">Get started free</Link>
+          <Link className="lp-btn lp-btn-soft" href="/signup?start=sample">See the sample case</Link>
         </div>
-        <p className="lp-hero-note">
-          The sample is Arjun Raman, a fictional applicant. His office, his letter type and his deadline rules are real.
+        <p className="lp-hero-link">
+          <Link href="/countries" className="lp-ulink">Which offices are covered?</Link>
         </p>
       </div>
-
-      <div className="lp-hero-visual" data-reveal>
-        <PhotoCard
-          src="/landing/hero-city.jpg"
-          alt="An evening street in Warsaw, the city where Dossierly's first cases live"
-          tone="dusk"
-          className="lp-hero-card"
-        >
-          <span className="lp-glass-chip lp-hero-agent">
-            <span className="lp-live" aria-hidden="true" />Agent online · private sandbox
-          </span>
-          <span className="lp-glass-chip lp-hero-place">Warsaw, Poland</span>
-
-          <div className="lp-float lp-float-interp" aria-label="An interpreted line from the counter">
-            <div className="lp-turn lp-turn-off">
-              <span className="lp-turn-who">Official · Polish</span>
-              <p lang="pl">„Brakuje potwierdzenia ubezpieczenia zdrowotnego.”</p>
-            </div>
-            <div className="lp-turn lp-turn-you">
-              <span className="lp-turn-who">For you · English</span>
-              <p>Proof of health insurance is missing.</p>
-            </div>
-          </div>
-
-          <div className="lp-float lp-float-deadline" aria-label="Deadline for Arjun's wezwanie">
-            <div className="lp-dl-head">
-              <span className="lp-mini-label">Wezwanie · delivered Tue 27 Oct</span>
-              <span className="lp-icon-btn lp-icon-btn-sm" aria-hidden="true"><Icon name="calendar" size={16} /></span>
-            </div>
-            <p className="lp-dl-big">Reply by 10 Nov</p>
-            <p className="lp-dl-sub">14 days from delivery · counted in code</p>
-            <ol className="lp-ticks" aria-hidden="true">
-              {TICKS.map((t) => <li key={t} className={t === 14 ? "is-last" : undefined} style={{ "--i": t } as CSSProperties} />)}
-            </ol>
-            <div className="lp-ticks-legend" aria-hidden="true"><span>28 Oct · day 1</span><span>day 14</span></div>
-          </div>
-        </PhotoCard>
+      <div className="lp-wrap lp-hero-stage">
+        <HeroMock />
+        <p className="lp-hero-proof">Poland first · the Mazowiecki office in Warsaw · interprets and explains, never legal advice</p>
       </div>
     </section>
   );

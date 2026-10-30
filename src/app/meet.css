@@ -23,7 +23,7 @@
 .type-row .input { min-height: 46px; }
 .talk {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 64px; border-radius: 16px;
-  font-size: 1.12rem; font-weight: 750; cursor: pointer; border: 2px solid transparent; color: #fff; transition: transform 0.1s, box-shadow 0.2s;
+  font-size: 1.12rem; font-weight: 600; cursor: pointer; border: 2px solid transparent; color: #fff; transition: transform 0.1s, box-shadow 0.2s;
 }
 .talk:active { transform: scale(0.99); }
 .talk[disabled] { opacity: 0.55; cursor: not-allowed; }
@@ -52,7 +52,7 @@
 .turn-own { background: transparent; box-shadow: none; border-left-width: 3px; padding: 4px 12px; }
 .turn-head { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
 .turn-orig { margin: 4px 0 2px; font-size: 0.88rem; color: var(--ink-2); }
-.turn-trans { margin: 0; font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.5rem); line-height: 1.32; font-weight: 650; }
+.turn-trans { margin: 0; font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.5rem); line-height: 1.32; font-weight: 500; }
 .turn-own-text { margin: 2px 0 0; font-size: 0.95rem; color: var(--ink-2); }
 .turn-fail { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
 
@@ -61,7 +61,7 @@
 .watch-quote { margin: 0; font-size: 0.9rem; color: var(--ink-2); }
 .watch-expl { margin: 0; font-weight: 600; }
 .watch-q { padding: 8px 10px; border-radius: 10px; background: var(--official-soft); }
-.watch-q-pl { margin: 0 0 2px; font-weight: 700; color: var(--official); }
+.watch-q-pl { margin: 0 0 2px; font-weight: 600; color: var(--official); }
 
 .log-sheet { position: fixed; inset: 8% 0 0; z-index: 80; background: var(--surface); border-radius: 18px 18px 0 0; padding: 18px 16px 32px; overflow-y: auto; box-shadow: 0 -10px 40px rgb(0 0 0 / 20%); max-width: 760px; margin: 0 auto; }
 .log-sheet .turn-own { background: var(--surface); }
