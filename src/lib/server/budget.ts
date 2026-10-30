@@ -3,7 +3,7 @@ import { dayKey } from "./util";
 
 export type BudgetKind = "tf_usd" | "tavily_credits";
 const MICRO = 1_000_000;
-const GLOBAL_CAPS: Record<BudgetKind, number> = { tf_usd: 2, tavily_credits: 10 };
+export const GLOBAL_CAPS: Record<BudgetKind, number> = { tf_usd: 2, tavily_credits: 10 };
 const USER_CAPS: Partial<Record<BudgetKind, number>> = { tavily_credits: 1 };
 
 async function spend(env: Env, scope: string, kind: BudgetKind, micro: number, capMicro: number): Promise<boolean> {

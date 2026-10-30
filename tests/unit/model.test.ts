@@ -5,7 +5,7 @@ import { maskerFor } from "@/lib/mask";
 import { runModel } from "@/lib/model";
 import { costUsd } from "@/lib/model/cost";
 import { ModelError, type ChatClient, type ChatRequest } from "@/lib/model/types";
-import { checkAndSpend } from "@/lib/server/budget";
+import { GLOBAL_CAPS, checkAndSpend } from "@/lib/server/budget";
 import { freshLocalEnv } from "@/lib/server/local";
 
 const sdk: { calls: Array<Record<string, unknown>>; impl: (b: unknown) => Promise<unknown> } = { calls: [], impl: async () => ({}) };
@@ -98,7 +98,7 @@ describe("runModel", () => {
 
   it("serves the recorded fixture as replay once the daily cap is spent, without calling the model", async () => {
     const env = freshLocalEnv({ NEBIUS_API_KEY: "test-key" });
-    expect(await checkAndSpend(env, "tf_usd", 0.5)).toBe(true);
+    expect(await checkAndSpend(env, "tf_usd", GLOBAL_CAPS.tf_usd)).toBe(true);
     const { client, calls } = fake('{"translation":"LIVE"}');
     const out = await runModel({ env, userId: "u1", client }, base());
     expect(out.data.translation).toBe("REPLAY");
