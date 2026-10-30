@@ -28,7 +28,7 @@ export function SpeakerHalf({ side, speechLang, userLang, turns, onSay, onRetry,
   const c = COPY[side];
   const [typing, setTyping] = useState(false);
   const [text, setText] = useState("");
-  const listen = useListen(speechLang, onSay);
+  const listen = useListen(speechLang, onSay, { translate: side === "official" ? "en" : "pl" });
   const recent = turns.slice(-2);
   const scroller = useRef<HTMLDivElement>(null);
   const last = turns.at(-1);
@@ -52,7 +52,13 @@ export function SpeakerHalf({ side, speechLang, userLang, turns, onSay, onRetry,
         ))}
         {children}
       </div>
-      {listen.state === "listening" && listen.interim && <p className="interim" lang={side === "official" ? "pl" : userLang}>{listen.interim}</p>}
+      {(listen.state === "listening" || listen.state === "transcribing") && listen.interim && <p className="interim" lang={side === "official" ? "pl" : userLang}>{listen.interim}</p>}
+      {listen.detail && (
+        <p className="asr-note tiny">
+          Heard by NVIDIA Parakeet{listen.detail.ms ? ` · ${(listen.detail.ms / 1000).toFixed(1)} s` : ""}
+          {listen.detail.translation ? <> · NVIDIA Canary: <span lang={side === "official" ? "en" : "pl"}>{listen.detail.translation}</span></> : null}
+        </p>
+      )}
       {listen.error && <p className="small half-error" role="status">{listen.error}</p>}
       {typing && (
         <form className="type-row" onSubmit={submit}>
@@ -69,7 +75,7 @@ export function SpeakerHalf({ side, speechLang, userLang, turns, onSay, onRetry,
           aria-pressed={listen.state === "listening"}
         >
           <Icon name="mic" size={26} />
-          <span>{listen.state === "listening" ? c.listening : listen.supported ? c.talk : side === "official" ? "Mikrofon niedostępny" : "No speech input here"}</span>
+          <span>{listen.state === "listening" ? c.listening : listen.state === "transcribing" ? (side === "official" ? "Przetwarzam…" : "Transcribing…") : listen.supported ? c.talk : side === "official" ? "Mikrofon niedostępny" : "No speech input here"}</span>
         </button>
         <button type="button" className="btn btn-ghost key-btn" onClick={() => setTyping(!typing)} aria-pressed={typing} aria-label={c.type}>
           <Icon name="keyboard" />

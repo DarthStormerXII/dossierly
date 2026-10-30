@@ -10,8 +10,8 @@ export interface ListenHandle {
 }
 
 /**
- * Swap point for speech. The default is the browser Web Speech API; a
- * Parakeet/Canary endpoint on Nebius Serverless can implement this later.
+ * Swap point for speech. NVIDIA Parakeet (src/lib/speech/parakeet.ts) handles pl/en/uk when the agent host is
+ * online; the browser Web Speech API covers the rest.
  */
 export interface SpeechProvider {
   readonly id: string;

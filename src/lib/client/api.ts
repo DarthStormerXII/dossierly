@@ -177,6 +177,10 @@ export const api = {
   reminder: (date: string, label: string) => post<unknown>("/api/me/deadlines", { date, label: label.slice(0, 120) }),
   task: <R>(id: string) => call<AgentTask<R>>(`/api/agent/tasks/${encodeURIComponent(id)}`),
   hubChanges: () => call<{ changes: { title: string; summary: string; url: string; detectedAt: string }[] }>("/api/hub/changes?country=pl"),
+  asrStart: (audioB64: string, lang: "pl" | "en" | "uk" | "hi" | "ta", translate?: "en" | "pl") =>
+    post<{ id: string }>("/api/asr", translate ? { audio: audioB64, lang, translate } : { audio: audioB64, lang }),
+  asrGet: (id: string) =>
+    call<{ status: "queued" | "running" | "done" | "failed"; text?: string; error?: string; ms?: number; model?: string; translation?: string; translationModel?: string }>(`/api/asr/${encodeURIComponent(id)}`),
   checkout: (product: Product, code?: string) => post<{ checkoutUrl: string }>("/api/checkout", code ? { product, code } : { product }),
   redeem: (code: string) => post<{ plan: Plan }>("/api/redeem", { code }),
 };

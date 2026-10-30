@@ -1,4 +1,5 @@
 import { createApi } from "./api.mjs";
+import { createAsrLoop } from "./asr.mjs";
 import { loadConfig } from "./config.mjs";
 import { createEgressFlusher } from "./egress.mjs";
 import { createPool } from "./pool.mjs";
@@ -70,5 +71,8 @@ async function main() {
   await Promise.allSettled([...active]);
 }
 
-for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => { stopping = true; });
+const asr = createAsrLoop(cfg, log);
+asr.run().catch((e) => log("asr loop stopped:", e.message));
+
+for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => { stopping = true; asr.stop(); });
 await main();

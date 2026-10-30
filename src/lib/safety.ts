@@ -140,4 +140,4 @@ export const SAFETY_NOTICE: Record<Language, string> = {
 };
 
 export const NO_AUDIO_NOTICE =
-  "This app never records or stores audio. Only text is sent to the interpreter. Your browser's own speech recognition may process your voice.";
+  "This app never stores audio. Each spoken turn is transcribed by NVIDIA Parakeet on the private-agent host and deleted; only text is sent to the interpreter.";

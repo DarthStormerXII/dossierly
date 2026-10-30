@@ -71,7 +71,7 @@ const FAQ = [
   { q: "Is this legal advice?", a: "No. Dossierly interprets and explains. It never gives legal or medical advice, and an interpret-only guard checks every turn." },
   { q: "Which countries and offices are covered?", a: "Poland first: temporary residence and work at the Mazowiecki office in Warsaw. Germany and France are next. A country goes live only when its offices, letter types and deadline rules are covered from their sources." },
   { q: "Which languages can I use?", a: "The official's side is Polish. You can speak English, Ukrainian, Hindi or Tamil. Interface labels are in English; content follows your language." },
-  { q: "Does Dossierly hear my audio?", a: "No. Speech recognition and the Polish voice are your browser's own (Chrome sends speech to Google to transcribe it). Dossierly receives text, never audio." },
+  { q: "Does Dossierly keep my audio?", a: "No. Each spoken turn in Polish, English or Ukrainian is sent once to our private-agent host, transcribed by NVIDIA Parakeet and deleted; only the text is kept. Hindi and Tamil use your browser's own recognition." },
   { q: "What happens to my personal data?", a: "Your case lives on your device, encrypted with AES-GCM. Identifiers are masked before any model call, every model call and connection is listed in your privacy ledger, and Nebius does not train on customer data." },
   { q: "What does it cost?", a: "Free to start: three official letters, appointment preparation, interpreting and deadlines. Dossierly Plus is $39 once per case, for one residence case over 18 months. Nothing renews." },
 ];

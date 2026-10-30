@@ -1,3 +1,4 @@
+import { ASR_MODEL, asrOnline } from "@/lib/server/asr";
 import { getBudgets } from "@/lib/server/budget";
 import { getEnv } from "@/lib/server/env";
 import { errorResponse } from "@/lib/server/http";
@@ -21,10 +22,11 @@ function parseTime(v: string | null): number | null {
 export async function GET() {
   try {
     const env = getEnv();
-    const [seenRaw, sandboxesRaw, budgets] = await Promise.all([
+    const [seenRaw, sandboxesRaw, budgets, asr] = await Promise.all([
       env.CACHE.get("bridge:lastSeen"),
       env.CACHE.get("bridge:sandboxes"),
       getBudgets(env),
+      asrOnline(env),
     ]);
     const seen = parseTime(seenRaw);
     const sandboxes = Number(sandboxesRaw);
@@ -36,6 +38,7 @@ export async function GET() {
         sandboxes: Number.isFinite(sandboxes) ? sandboxes : 0,
       },
       budgets,
+      asr: { online: asr, model: ASR_MODEL },
     }, { headers: { "cache-control": "no-store" } });
   } catch (e) {
     return errorResponse(e);

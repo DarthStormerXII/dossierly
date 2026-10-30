@@ -26,6 +26,7 @@ export type Status = {
   models: { id: string; role: string; ready: boolean }[];
   bridge: { online: boolean; lastSeen: string | null; sandboxes: number };
   budgets?: unknown;
+  asr?: { online: boolean; model: string };
 };
 
 export type Intro = { local: string; english: string; masked?: number; run: Run };

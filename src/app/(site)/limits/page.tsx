@@ -9,7 +9,7 @@ const KNOWN = [
   { t: "Your agent sees plain text while it works", d: "Names, case numbers, PESEL and addresses are masked first, but the rest of the case is readable by your agent during a task." },
   { t: "The ledger is our own record", d: "We write the ledger and hash-chain it so changes are detectable. The sandbox's own network log (OpenShell) is collected on a best-effort basis and may miss entries." },
   { t: "Limited local capacity", d: "Until our first 10–20 users, personal agents run on our own hardware, which handles about 4 to 6 agents at once. When it is busy, tasks run on the cloud fallback and are labelled that way." },
-  { t: "Speech recognition is your browser's", d: "Dossierly never receives audio. Your browser turns speech into text; Chrome may use Google's servers for this. Typing always works." },
+  { t: "Speech is transcribed by NVIDIA Parakeet", d: "In Polish, English and Ukrainian, each spoken turn is sent once to our private-agent host, transcribed by NVIDIA Parakeet, then deleted: no audio is stored. Hindi and Tamil use your browser's own recognition, and the spoken Polish voice is your browser's. Typing always works." },
   { t: "Deadlines need the right delivery date", d: "We count from the date you give us, using the rules quoted on the Poland page. The date written in your letter always wins. Check it." },
   { t: "Not legal or medical advice", d: "Dossierly interprets and explains. For advice, find a qualified lawyer (rejestradwokatow.pl) or a doctor." },
 ];
