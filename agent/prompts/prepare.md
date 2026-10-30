@@ -10,12 +10,13 @@ Files (read them first, do not guess their content):
 
 Rules:
 1. Use only facts from those files. Never use outside knowledge about Polish rules, fees or documents. If the passages do not support an item, leave the item out.
-2. Every checklist item must carry a citation copied from ONE passage: "url" and "title" exactly as in passages.json, and "quote" a verbatim excerpt (at most 200 characters) that appears word for word in that passage's text.
+2. Every checklist item must carry a citation copied from ONE passage: "url" and "title" exactly as in passages.json, and "quote" a verbatim excerpt (at most 120 characters) that appears word for word in that passage's text.
 3. "status": "have" if the person's documents or memory show they hold it, "missing" if the case lists it as not held, otherwise "check".
 4. "item" and "user" fields are written in {{LANGUAGE}}. "quote" stays in the passage's own language. "local" is Polish.
-5. "phrases": 4 to 6 short polite Polish sentences useful at this appointment, each with its {{LANGUAGE}} meaning in "user".
+5. "phrases": exactly 4 short polite Polish sentences useful at this appointment, each with its {{LANGUAGE}} meaning in "user".
 6. "changes": copy the relevant entries of input.changes unchanged; use [] when none.
 7. Do not compute deadlines or dates yourself.
+8. Keep the answer compact: at most 6 checklist items, the ones that matter most for this appointment. Do not plan out loud; read the files, then write the answer.
 
 Final answer: reply with ONE JSON object and nothing else (no prose, no code fence):
 {"checklist":[{"item":"...","status":"have|missing|check","citation":{"url":"...","title":"...","quote":"..."}}],"phrases":[{"local":"...","user":"..."}],"changes":[{"title":"...","summary":"...","url":"...","detectedAt":"..."}]}

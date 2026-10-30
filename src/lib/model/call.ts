@@ -1,5 +1,5 @@
 import type { ZodType } from "zod";
-import { MODEL_TABLE, MODEL_IDS, PRICES, type ModelTask } from "../config";
+import { FALLBACK_MODEL, MODEL_TABLE, MODEL_IDS, PRICES, type ModelTask } from "../config";
 import type { Masker } from "../mask";
 import type { Env } from "../server/env";
 import { checkAndSpend } from "../server/budget";
@@ -105,21 +105,25 @@ export async function runModel<T>(ctx: Ctx, call: ModelCall<T>): Promise<ModelOu
 
   const client = ctx.client ?? createTokenFactoryClient(key);
   const t0 = Date.now();
-  const res = await callJson(
-    client,
-    {
-      model,
-      messages,
-      maxTokens: call.maxTokens,
-      thinking: call.thinking ?? false,
-      flex: call.flex,
-      logprobs: call.logprobs,
-      json: call.json ?? "json_object",
-    },
-    call.schema,
-  );
-  const run = makeRun(model, Date.now() - t0, res.usage, "cloud");
-  await safely(recordLedger(ctx.env, { userId: ctx.userId, kind: "model", what: model, action: "allowed", bytes, masked, detail: { task: call.task } }));
+  const ask = (m: string) =>
+    callJson(
+      client,
+      { model: m, messages, maxTokens: call.maxTokens, thinking: call.thinking ?? false, flex: call.flex, logprobs: call.logprobs, json: call.json ?? "json_object" },
+      call.schema,
+    );
+  // If the model is missing (404), text tasks move to the next Nemotron model; vision has no substitute.
+  let used = model;
+  let res: Awaited<ReturnType<typeof ask>>;
+  try {
+    res = await ask(model);
+  } catch (e) {
+    const backup = FALLBACK_MODEL[MODEL_TABLE[call.task]];
+    if (!(e instanceof ModelError) || e.code !== "model_unavailable" || call.images?.length || !backup) throw e;
+    used = MODEL_IDS[backup];
+    res = await ask(used);
+  }
+  const run = makeRun(used, Date.now() - t0, res.usage, "cloud");
+  await safely(recordLedger(ctx.env, { userId: ctx.userId, kind: "model", what: used, action: "allowed", bytes, masked, detail: { task: call.task, ...(used !== model ? { fallbackFrom: model } : {}) } }));
   await safely(recordRun(ctx.env, ctx.userId, run, call.task));
   return { data: call.masker.restoreDeep(res.data), run, masked, raw: res.raw, logprobs: res.logprobs };
 }

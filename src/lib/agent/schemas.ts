@@ -101,7 +101,17 @@ function lenient<T extends z.ZodType>(item: T, max: number) {
     .default([])
     .transform((list) => list.flatMap((v) => { const r = item.safeParse(v); return r.success ? [r.data as z.infer<T>] : []; }).slice(0, max));
 }
-const ChecklistItemSchema = z.object({ item: str(300), status: z.enum(["have", "missing", "check"]), citation: CitationSchema });
+/** Status words are normalised ("Have", "needed", "unknown"); the server then sets have/missing from the case's documents. */
+const StatusSchema = z.preprocess((v) => {
+  const s = String(v ?? "").trim().toLowerCase();
+  return s === "have" || s === "held" || s === "yes" ? "have" : s === "missing" || s === "needed" || s === "no" ? "missing" : "check";
+}, z.enum(["have", "missing", "check"]));
+const LooseCitationSchema = z.object({
+  url: z.string().url().max(500),
+  title: str(300),
+  quote: z.string().trim().min(1).transform((q) => q.slice(0, 600)),
+});
+const ChecklistItemSchema = z.object({ item: str(300), status: StatusSchema, citation: LooseCitationSchema });
 const PhraseSchema = z.object({ local: str(300), user: str(400) });
 const ChangeSchema = z.object({ title: str(300), summary: z.string().max(1000), url: z.string().url().max(500), detectedAt: str(40) });
 export const PrepareResultSchema = z.object({

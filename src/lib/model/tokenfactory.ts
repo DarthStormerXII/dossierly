@@ -7,6 +7,8 @@ function mapError(err: unknown): never {
   if (err instanceof ModelError) throw err;
   if (err instanceof OpenAI.APIError) {
     if (err.status === 429) throw new ModelError("The model service is busy, try again", "rate_limited", 429);
+    // A model can vanish from Token Factory for a while and come back (Super VL did on 30 Oct).
+    if (err.status === 404) throw new ModelError("This model is briefly unavailable", "model_unavailable", 503);
     if (err.status === 401 || err.status === 403) {
       throw new ModelError("The model service rejected the API key", "provider_unavailable");
     }

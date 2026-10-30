@@ -7,7 +7,7 @@ import { checkAndSpend } from "../server/budget";
 import type { Env } from "../server/env";
 import { recordLedger } from "../server/ledger";
 import { recordRun, type Run } from "../server/runs";
-import { enforceAskCitations, enforcePrepareCitations } from "./citations";
+import { applyCaseStatus, enforceAskCitations, enforcePrepareCitations } from "./citations";
 import { renderCaseMemory } from "./case-memory";
 import { DIRECT_ANSWER_NOTE, fillPrompt } from "./prompt";
 import { PROMPT_TEXT } from "./prompt-text";
@@ -43,8 +43,10 @@ export function buildCloudMessages(row: Pick<TaskRow, "kind" | "input">) {
 export function finalise(kind: TaskRow["kind"], raw: unknown, input: unknown): { data: unknown; note?: string } {
   const parsed = ResultSchemas[kind].parse(raw);
   if (kind === "prepare") {
-    const { result, report } = enforcePrepareCitations(PrepareResultSchema.parse(parsed), (input as PrepareInput).passages);
-    if (result.checklist.length === 0) throw new Error("no checklist item could be tied to an official passage");
+    const prep = input as PrepareInput;
+    const { result: cited, report } = enforcePrepareCitations(PrepareResultSchema.parse(parsed), prep.passages);
+    if (cited.checklist.length === 0) throw new Error("no checklist item could be tied to an official passage");
+    const result = applyCaseStatus(cited, prep.case.documents);
     return { data: result, note: report.dropped || report.repaired ? `citations: ${report.dropped} dropped, ${report.repaired} repaired` : undefined };
   }
   if (kind === "ask") {

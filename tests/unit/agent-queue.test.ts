@@ -97,7 +97,7 @@ describe("cloud fallback timing", () => {
     expect((await listLedger(env, "u1", 10)).entries[0].what).toContain("cloud fallback");
   });
 
-  it("downgrades a fabricated quote and drops a citation outside the provided passages", async () => {
+  it("repairs a fabricated quote from the passage, takes status from the case and drops a citation outside the provided passages", async () => {
     const env = freshLocalEnv({ NEBIUS_API_KEY: "test" });
     const { taskId } = await enqueueAgentTask(env, { userId: "u1", kind: "prepare", input: prepareInput() });
     const bad = {
@@ -113,8 +113,9 @@ describe("cloud fallback timing", () => {
     await jobs[0]();
     const view = taskView((await getTask(env, taskId))!) as unknown as { result: typeof validPrepare };
     expect(view.result.checklist).toHaveLength(1);
-    expect(view.result.checklist[0].status).toBe("check");
-    expect(view.result.checklist[0].citation.quote).toContain("proof of health insurance");
+    // The model claimed "have"; the case lists the health insurance certificate as not held.
+    expect(view.result.checklist[0].status).toBe("missing");
+    expect(view.result.checklist[0].citation.quote.toLowerCase()).toContain("health insurance");
   });
 
   it("fails cleanly when the model never returns valid JSON", async () => {

@@ -44,6 +44,9 @@ export const MODEL_TABLE: Record<ModelTask, ModelKey> = {
   link_fallback: "superVl",
 };
 
+/** Used once if a model returns 404 (it can vanish from Token Factory for hours and come back). Text tasks only. */
+export const FALLBACK_MODEL: Partial<Record<ModelKey, ModelKey>> = { lightning: "superVl", superVl: "ultra", ultra: "superVl" };
+
 /** List prices, USD per million tokens: input, cached input, output. */
 export const PRICES: Record<ModelKey, { in: number; cached: number; out: number }> = {
   lightning: { in: 0.06, cached: 0.03, out: 0.24 },

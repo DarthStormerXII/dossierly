@@ -9,6 +9,9 @@ import { addTimelineLine, extractJson } from "./json.mjs";
 import { memoryHash, readMemory, runDcode, stageFiles } from "./sandbox.mjs";
 import { nemo } from "./shell.mjs";
 
+const FINISH_PROMPT =
+  "You have read the files. Now produce the final answer for this task: write ONE JSON object in the exact shape the task asked for to /sandbox/task/answer.json, then reply with the same JSON object and nothing else.";
+
 const SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const est = (s) => Math.ceil(String(s).length / 4);
 
@@ -51,7 +54,7 @@ export async function runTask(task, { cfg, pool, mask }, log) {
     let durationMs = 0;
     let tokensIn = 0;
     let tokensOut = 0;
-    for (let attempt = 0; attempt < 3 && !result; attempt++) {
+    for (let attempt = 0; attempt < 2 && !result; attempt++) {
       t = Date.now();
       const prompt = promptFor(cfg, task.kind, language, retryNote);
       const r = await runDcode(sandbox, prompt, cfg.dcodeTimeoutS);
@@ -62,13 +65,19 @@ export async function runTask(task, { cfg, pool, mask }, log) {
       tokensOut += est(r.response);
       try {
         // Deep Agents is a coding agent: it writes its answer to a file and often ends with prose, so prefer the file.
-        const answer = await readAnswerFile(sandbox);
-        if (!answer && !String(r.response).includes("{")) {
-          log?.(`attempt ${attempt + 1}: reply ${String(r.response).length} chars, no JSON, no answer file`);
-          // An empty reply is a runtime hiccup, not a model answer: pause briefly before the next attempt.
-          if (!String(r.response).trim()) await new Promise((res) => setTimeout(res, 3000));
+        let answer = await readAnswerFile(sandbox);
+        let reply = String(r.response);
+        if (!answer && !reply.includes("{") && r.threadId) {
+          // The run ended on a tool call without a final message: ask the same thread for the answer it has worked out.
+          log?.(`attempt ${attempt + 1}: reply ${reply.length} chars, no JSON, no answer file; resuming the thread`);
+          t = Date.now();
+          const again = await runDcode(sandbox, FINISH_PROMPT, Math.min(cfg.dcodeTimeoutS, 90), r.threadId);
+          mark("agent finished its answer", t, "dcode");
+          answer = await readAnswerFile(sandbox);
+          if (again.ok) reply = String(again.response);
         }
-        const parsed = ResultSchemas[task.kind].safeParse(extractJson(answer ?? r.response));
+        if (!answer && !reply.includes("{")) log?.(`attempt ${attempt + 1}: still no JSON after resuming`);
+        const parsed = ResultSchemas[task.kind].safeParse(extractJson(answer ?? reply));
         if (parsed.success) result = parsed.data;
         else retryNote = `${parsed.error.issues[0].path.join(".") || "answer"}: ${parsed.error.issues[0].message}`;
       } catch (e) {

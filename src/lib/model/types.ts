@@ -48,6 +48,7 @@ export type ModelErrorCode =
   | "provider_unavailable"
   | "rate_limited"
   | "model_error"
+  | "model_unavailable"
   | "invalid_output"
   | "over_budget"
   | "bad_request";
