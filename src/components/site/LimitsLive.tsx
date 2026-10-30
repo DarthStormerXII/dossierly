@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Audit = { harmfulBlockRate?: number; benignAllowRate?: number; total?: number; ranAt?: string; model?: string; p50Ms?: number; p95Ms?: number; region?: string };
+type Audit = { harmfulBlockRate?: number; benignAllowRate?: number; total?: number; ranAt?: string; model?: string; p50Ms?: number; p95Ms?: number; ranOn?: string; tool?: string; jobId?: string | null; heldOut?: { total: number; harmfulBlockRate: number; benignAllowRate: number } | null };
 type Limits = { pending: boolean; audit?: Audit; eval?: Record<string, unknown>; updatedAt?: string };
 
 const pct = (n?: number) => (typeof n === "number" ? `${(n * 100).toFixed(1)}%` : "—");
@@ -19,12 +19,20 @@ export function LimitsLive() {
   }, []);
 
   const a = data?.audit;
-  const audit = a ?? { harmfulBlockRate: 0.933, benignAllowRate: 1, total: 23 };
+  if (!a) {
+    return (
+      <section className="cov-item" aria-labelledby="audit-h">
+        <h2 id="audit-h" style={{ margin: 0, fontSize: "1.2rem" }}>Safety audit: NeMo Guardrails</h2>
+        <p className="small muted" style={{ margin: "10px 0 0" }}>{failed ? "The audit result could not be loaded." : data?.pending ? "No audit has been published yet." : "Loading…"}</p>
+      </section>
+    );
+  }
+  const audit = a;
   return (
     <section className="cov-item" aria-labelledby="audit-h">
       <div className="row between">
         <h2 id="audit-h" style={{ margin: 0, fontSize: "1.2rem" }}>Safety audit: NeMo Guardrails</h2>
-        <span className="chip">{a ? `run ${a.ranAt?.slice(0, 10) ?? ""}` : data?.pending || failed ? "last published result" : "loading…"}</span>
+        <span className="chip">run {a.ranAt?.slice(0, 10) ?? ""}</span>
       </div>
       <dl className="stat-row" style={{ margin: "16px 0 10px", gridTemplateColumns: "repeat(3, 1fr)" }}>
         <div><dt>Advice and harmful prompts blocked</dt><dd className="mono">{pct(audit.harmfulBlockRate)}</dd></div>
@@ -32,8 +40,10 @@ export function LimitsLive() {
         <div><dt>Test cases</dt><dd className="mono">{audit.total ?? "—"}</dd></div>
       </dl>
       <p className="small muted" style={{ margin: 0 }}>
-        Indicative only: the rails were tuned on the same small set they were tested on, so expect lower numbers on new prompts. Run as a Nebius Serverless Job{a?.region ? ` in ${a.region}` : ""}.
-        {a?.p95Ms ? ` p95 latency ${Math.round(a.p95Ms)} ms.` : ""}
+        {audit.tool ?? "NeMo Guardrails"} on {audit.model ?? "Nemotron"}, run as a {audit.ranOn ?? "Nebius Serverless Job"}
+        {audit.jobId ? <>, job <span className="mono">{audit.jobId}</span></> : null}.
+        {audit.heldOut ? ` ${audit.heldOut.total} of the prompts were written after the rail was tuned: ${pct(audit.heldOut.harmfulBlockRate)} blocked, ${pct(audit.heldOut.benignAllowRate)} allowed.` : ""}
+        {audit.p95Ms ? ` p95 latency ${Math.round(audit.p95Ms)} ms.` : ""}
       </p>
     </section>
   );

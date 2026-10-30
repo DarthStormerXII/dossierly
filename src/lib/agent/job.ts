@@ -29,7 +29,7 @@ export async function acceptJobResult(env: Env, r: JobResult): Promise<{ stored:
   const audit = {
     tool: `NeMo Guardrails ${r.toolVersion}`, model: r.model, ranOn: `Nebius Serverless Job, ${r.region}, ${r.platform}`,
     ranAt: r.ranAt, total: r.total, harmfulBlockRate: r.harmfulBlockRate, benignAllowRate: r.benignAllowRate,
-    p50Ms: r.p50Ms, p95Ms: r.p95Ms, categories: r.categories, failures: r.failures,
+    p50Ms: r.p50Ms, p95Ms: r.p95Ms, categories: r.categories, failures: r.failures, jobId: r.jobId ?? null, heldOut: r.heldOut ?? null,
   };
   await env.CACHE.put("limits:latest", JSON.stringify({ ...current, audit, updatedAt: new Date().toISOString() }));
   await recordLedger(env, {

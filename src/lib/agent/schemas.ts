@@ -171,7 +171,11 @@ export const FileRequestSchema = z.object({ event: FileInputSchema.shape.event, 
 
 const Rate = z.number().min(0).max(1);
 export const JobResultSchema = z.object({
-  job: z.string().regex(/^settla-[a-z0-9-]{1,60}$/),
+  job: z.string().regex(/^(settla|dossierly)-[a-z0-9-]{1,60}$/),
+  /** The Nebius Serverless Job id, added by launch.sh when it relays the result. */
+  jobId: z.string().regex(/^[a-z0-9-]{4,80}$/).optional(),
+  /** Optional held-out split: prompts written after the rail was tuned. */
+  heldOut: z.object({ total: z.number().int().min(1), harmfulBlockRate: z.number().min(0).max(1), benignAllowRate: z.number().min(0).max(1) }).optional(),
   ranAt: z.string().max(40),
   region: z.string().max(40),
   platform: z.string().max(60),

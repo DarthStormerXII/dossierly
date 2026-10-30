@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useCase } from "@/lib/client/store";
 import { Icon, type IconName } from "../../Icon";
 
-type Audit = { tool: string; model: string; ranOn: string; ranAt: string; total: number; harmfulBlockRate: number; benignAllowRate: number; p50Ms: number };
+type Audit = { tool: string; model: string; ranOn: string; ranAt: string; total: number; harmfulBlockRate: number; benignAllowRate: number; p50Ms: number; jobId?: string | null };
 
 const STEPS: { icon: IconName; title: string; body: string; href: string }[] = [
   { icon: "prepare", title: "Prepare", body: "Before an appointment, your agent reads today's official pages and builds a checklist where every line cites its paragraph.", href: "/app/prepare" },
@@ -69,7 +69,7 @@ export function HelpPage() {
                 <div><b>{pct(audit.benignAllowRate)}</b><span>ordinary requests allowed</span></div>
               </div>
               <p className="muted small">
-                Audited with {audit.tool} on a {audit.ranOn}, {audit.total} test prompts, {new Date(audit.ranAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}. Indicative: the rail was tuned on the same set.
+                Audited with {audit.tool} on a {audit.ranOn}, {audit.total} test prompts, {new Date(audit.ranAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}{audit.jobId ? <>, job <span className="mono">{audit.jobId}</span></> : null}.
               </p>
             </>
           ) : (
