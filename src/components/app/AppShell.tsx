@@ -3,20 +3,32 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { signOut } from "@/lib/client/api";
 import { CaseProvider, useCase } from "@/lib/client/store";
 import { Icon, type IconName } from "../Icon";
 import { Logo } from "../Logo";
+import { IdentityMenu } from "./IdentityMenu";
 import { Onboarding } from "./Onboarding";
 import { Loading } from "../States";
 
-const NAV: { href: string; label: string; icon: IconName }[] = [
+type NavItem = { href: string; label: string; icon: IconName };
+const TABS: NavItem[] = [
   { href: "/app", label: "Case", icon: "case" },
   { href: "/app/prepare", label: "Prepare", icon: "prepare" },
   { href: "/app/meet", label: "Meet", icon: "meet" },
   { href: "/app/letters", label: "Letters", icon: "letter" },
   { href: "/app/privacy", label: "Privacy", icon: "shield" },
 ];
+/** Desktop sidebar groups; phones use TABS in the bottom bar and reach Learn through the account menu. */
+const GROUPS: { label: string; items: NavItem[] }[] = [
+  { label: "Case", items: [{ href: "/app", label: "Overview", icon: "case" }] },
+  { label: "Work", items: [TABS[1], TABS[2], TABS[3]] },
+  { label: "Records", items: [{ href: "/app/privacy", label: "Privacy ledger", icon: "shield" }] },
+  { label: "Learn", items: [
+    { href: "/app/help", label: "How it works", icon: "book" },
+    { href: "/app/plan", label: "Plan and billing", icon: "card" },
+  ] },
+];
+const isActive = (path: string, href: string) => (href === "/app" ? path === "/app" : path.startsWith(href));
 
 function AgentBadge() {
   const { status, dossier } = useCase();
@@ -70,23 +82,44 @@ function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { dossier } = useCase();
   usePlanStep();
-  const leave = async () => {
-    await signOut();
-    window.location.assign("/");
-  };
   return (
     <div className="app">
+      <aside className="app-side" aria-label="Case navigation">
+        <div className="side-top">
+          <Link href="/app" className="logo-link" aria-label="Dossierly, your case"><Logo size={24} /></Link>
+          <span className="chip chip-ai" title="You are using an AI system">AI</span>
+        </div>
+        <nav className="side-nav" aria-label="Sections">
+          {GROUPS.map((g) => (
+            <div key={g.label} className="side-group">
+              <span className="side-label">{g.label}</span>
+              {g.items.map((n) => {
+                const active = isActive(path, n.href);
+                return (
+                  <Link key={n.href} href={n.href} className={active ? "active" : undefined} aria-current={active ? "page" : undefined}>
+                    <Icon name={n.icon} size={18} /><span>{n.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+        <div className="side-bottom">
+          <AgentBadge />
+          <IdentityMenu />
+        </div>
+      </aside>
       <header className="app-header">
-        <Link href="/" className="logo-link" aria-label="Dossierly home"><Logo size={26} /></Link>
+        <Link href="/app" className="logo-link" aria-label="Dossierly, your case"><Logo size={22} /></Link>
         <span className="chip chip-ai" title="You are using an AI system">AI</span>
         {dossier?.sample && <span className="stamp" title="Fictional sample case">Sample</span>}
         <span className="grow" />
         <AgentBadge />
-        <button className="btn btn-ghost btn-small signout" onClick={() => void leave()} title="Sign out">Sign out</button>
+        <IdentityMenu compact />
       </header>
       <nav className="app-nav" aria-label="Case sections">
-        {NAV.map((n) => {
-          const active = n.href === "/app" ? path === "/app" : path.startsWith(n.href);
+        {TABS.map((n) => {
+          const active = isActive(path, n.href);
           return (
             <Link key={n.href} href={n.href} className={active ? "active" : undefined} aria-current={active ? "page" : undefined}>
               <Icon name={n.icon} />
@@ -98,17 +131,6 @@ function Shell({ children }: { children: React.ReactNode }) {
       <main className="app-main" id="main">
         <Body>{children}</Body>
       </main>
-      <footer className="app-foot tiny muted">
-        <span>Interprets and explains only. Not legal or medical advice.</span>
-        <span className="row" style={{ gap: 14 }}>
-          <Link href="/legal/terms">Terms</Link>
-          <Link href="/legal/privacy">Privacy</Link>
-          <Link href="/limits">Limits</Link>
-          <Link href="/countries">Countries</Link>
-          <Link href="/app/plan">Plan</Link>
-          <button className="linkish" onClick={() => void leave()}>Sign out</button>
-        </span>
-      </footer>
     </div>
   );
 }

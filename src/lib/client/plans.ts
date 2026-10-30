@@ -22,8 +22,8 @@ export const PLANS: PlanCard[] = [
       "Everything in Free, for the whole case",
       "Unlimited letters, linked and explained",
       "A Polish reply drafted for every letter",
-      "Change alerts when official pages change",
-      "Priority on your private agent",
+      "Deadlines tracked for every letter in the case",
+      "Family add-on available, +$15",
     ],
   },
 ];

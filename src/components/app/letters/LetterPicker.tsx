@@ -3,10 +3,10 @@
 import { useRef, useState } from "react";
 import { fileToPages, urlToPages } from "@/lib/client/pages";
 import { Icon } from "../../Icon";
+import { Dropzone } from "../../ui/Dropzone";
 
 export function LetterPicker({ sample, onPages, onError }: { sample: boolean; freeUsed: boolean; onPages(p: string[]): void; onError(m: string): void }) {
   const camera = useRef<HTMLInputElement>(null);
-  const pdf = useRef<HTMLInputElement>(null);
   const [preparing, setPreparing] = useState(false);
 
   const take = async (file?: File | null) => {
@@ -36,20 +36,21 @@ export function LetterPicker({ sample, onPages, onError }: { sample: boolean; fr
 
   return (
     <section className="card stack" aria-label="Add a letter">
-      <div className="pick-grid">
-        <button className="pick" onClick={() => camera.current?.click()} disabled={preparing}>
+      <div className="ui-picker">
+        <button className="pick ui-picker-camera" onClick={() => camera.current?.click()} disabled={preparing}>
           <Icon name="camera" size={28} />
           <b>Photograph the letter</b>
           <small>Flat surface, all four corners in view</small>
         </button>
-        <button className="pick" onClick={() => pdf.current?.click()} disabled={preparing}>
-          <Icon name="file" size={28} />
-          <b>Upload a PDF</b>
-          <small>From e-Doręczenia or email, up to 4 pages</small>
-        </button>
+        <Dropzone
+          accept="application/pdf,image/*"
+          onFile={(f) => void take(f)}
+          hint="PDF or photo from e-Doręczenia or email, up to 4 pages"
+          compactLabel="Or choose a PDF or photo"
+          disabled={preparing}
+        />
       </div>
       <input ref={camera} type="file" accept="image/*" capture="environment" hidden onChange={(e) => void take(e.target.files?.[0])} aria-label="Letter photo" />
-      <input ref={pdf} type="file" accept="application/pdf,image/*" hidden onChange={(e) => void take(e.target.files?.[0])} aria-label="Letter PDF or image" />
       {sample && (
         <div className="sample-letter row">
           <span className="stamp">Sample</span>

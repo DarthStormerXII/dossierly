@@ -5,12 +5,14 @@ import { useState } from "react";
 import { api, choosePlan, friendlyError } from "@/lib/client/api";
 import { useCase } from "@/lib/client/store";
 import type { Product } from "@/lib/client/types";
+import { Checkbox } from "../ui/Checkbox";
 import { FamilyAddon, PlanGrid } from "./PlanGrid";
 
 /** The one-time plan step after onboarding: Free goes straight into the case, Plus opens Dodo checkout. */
 export function Checkout({ suggest }: { suggest?: "plus" }) {
   const router = useRouter();
-  const { refreshMe } = useCase();
+  const { refreshMe, me } = useCase();
+  const freeChosen = me?.planChosen === true && me.plan.kind === "free";
   const [consent, setConsent] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -63,7 +65,11 @@ export function Checkout({ suggest }: { suggest?: "plus" }) {
       <PlanGrid
         action={(p) =>
           p === "free" ? (
-            <button className="btn btn-block" onClick={() => void free()} disabled={busy !== null}>{busy === "free" ? "Opening your case…" : "Start free"}</button>
+            freeChosen ? (
+              <button className="btn btn-block" disabled>Your current plan</button>
+            ) : (
+              <button className="btn btn-block" onClick={() => void free()} disabled={busy !== null}>{busy === "free" ? "Opening your case…" : "Start free"}</button>
+            )
           ) : (
             <button className="btn btn-block btn-primary" onClick={() => void buy(p as Product)} disabled={busy !== null} aria-describedby="consent-text">
               {busy === p ? "Opening checkout…" : discount ? "Continue to Plus with your code" : suggest === "plus" ? "Continue to payment" : "Get Plus · $39"}
@@ -71,10 +77,9 @@ export function Checkout({ suggest }: { suggest?: "plus" }) {
           )
         }
       />
-      <label className="check consent-row">
-        <input id="consent" type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+      <Checkbox id="consent" className="consent-row" checked={consent} onChange={setConsent}>
         <span id="consent-text" className="small">For Plus: I want access to start straight away and understand I lose my 14-day withdrawal right once it starts.</span>
-      </label>
+      </Checkbox>
       <form className="code-row" onSubmit={redeem} aria-label="Redeem a code">
         <input className="input" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Have a code?" aria-label="Code" autoComplete="off" maxLength={40} />
         <button className="btn" disabled={!code.trim() || busy !== null}>{busy === "redeem" ? "Checking…" : "Apply"}</button>

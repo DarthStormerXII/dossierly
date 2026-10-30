@@ -4,6 +4,7 @@ import { useState } from "react";
 import { longDate, todayIso } from "@/lib/client/format";
 import type { LetterRead } from "@/lib/client/types";
 import { Attribution } from "../../Attribution";
+import { DatePicker } from "../../ui/DatePicker";
 
 const KIND: Record<string, string> = {
   wezwanie_braki_formalne: "Wezwanie · missing documents",
@@ -106,7 +107,7 @@ export function LetterReading({ read, delivery, onDelivery, onLink, linking, lin
             Polish deadlines usually count from the day of delivery, not the date printed on the letter. Use the day you signed for it at the post office, or the date on the e-Doręczenia delivery receipt.
           </p>
           <div className="row">
-            <input className="input mono" type="date" value={delivery} max={todayIso()} onChange={(e) => onDelivery(e.target.value)} aria-label="Delivery date" style={{ maxWidth: 220 }} />
+            <DatePicker id="delivery-date" ariaLabel="Delivery date" value={delivery} max={todayIso()} onChange={onDelivery} placeholder="Choose the delivery day" />
             <button className="btn btn-primary" onClick={onLink} disabled={linking || !delivery}>{linking ? "Linking…" : "Link to my case and count the deadline"}</button>
           </div>
         </div>

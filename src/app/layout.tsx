@@ -6,6 +6,7 @@ import "./landing.css";
 import "./app.css";
 import "./features.css";
 import "./meet.css";
+import "./controls.css";
 
 const text = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-text", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin", "latin-ext"], variable: "--font-mono", display: "swap" });

@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { LANGUAGE_NAMES, OFFICES } from "@/lib/client/sample";
 import { useCase } from "@/lib/client/store";
 import type { Language } from "@/lib/client/types";
+import { Select } from "../ui/Select";
+
+const OFFICE_OPTIONS = OFFICES.map((o) => ({ value: o, label: o.replace("Wydział Spraw Cudzoziemców MUW - ", "Mazowiecki · "), description: o.replace(" - ", " · ") }));
 
 export function Onboarding() {
   const { startSample, startOwn } = useCase();
@@ -66,12 +69,10 @@ export function Onboarding() {
             ))}
           </div>
         </fieldset>
-        <label className="field">
-          <span>Your office</span>
-          <select className="input" value={office} onChange={(e) => setOffice(e.target.value)}>
-            {OFFICES.map((o) => <option key={o} value={o}>{o.replace("Wydział Spraw Cudzoziemców MUW - ", "Mazowiecki · ")}</option>)}
-          </select>
-        </label>
+        <div className="field">
+          <span id="office-label">Your office</span>
+          <Select id="office" labelledBy="office-label" value={office} onChange={setOffice} options={OFFICE_OPTIONS} />
+        </div>
         <p className="tiny muted" style={{ margin: 0 }}>Poland only for now: temporary residence and work in the Mazowieckie voivodeship. Germany and France are next.</p>
         <button className="btn btn-block btn-primary" disabled={busy || !name.trim()}>Create my case</button>
       </form>

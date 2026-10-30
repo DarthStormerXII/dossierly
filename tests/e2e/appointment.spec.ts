@@ -15,7 +15,8 @@ test("sample case: letter linked with deadline, then an interpreted appointment 
   await page.getByRole("link", { name: /Letters/ }).first().click();
   await page.getByRole("button", { name: "Use the sample letter" }).click();
   await expect(page.getByLabel("Polish text, exactly as printed")).toBeVisible({ timeout: 30_000 });
-  await page.getByLabel("Delivery date").fill("2026-10-27");
+  await page.locator("#delivery-date").click();
+  await page.locator(`.ui-day[data-iso="2026-10-27"]`).click();
   await page.getByRole("button", { name: /Link to my case/ }).click();
   await expect(page.getByText("How we counted it", { exact: false })).toBeVisible({ timeout: 30_000 });
   await page.getByRole("button", { name: "Add to case and set a reminder" }).click();

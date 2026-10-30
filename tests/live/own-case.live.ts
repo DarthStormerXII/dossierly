@@ -135,7 +135,8 @@ test("2a letters: PNG as own user = free first letter -> read, link, deadline 10
   expect(pl.length).toBeGreaterThan(40);
   expect(asks).toBeGreaterThan(0);
   await shot(page, "07-letter-read");
-  await page.getByLabel("Delivery date").fill("2026-10-27");
+  await page.locator("#delivery-date").click();
+  await page.locator(`.ui-day[data-iso="2026-10-27"]`).click();
   await page.getByRole("button", { name: /Link to my case/ }).click();
   await expect(page.getByText("How we counted it", { exact: false })).toBeVisible({ timeout: 120_000 });
   await expect(page.locator(".deadline-hero .dl-date")).toContainText("10 Nov 2026");

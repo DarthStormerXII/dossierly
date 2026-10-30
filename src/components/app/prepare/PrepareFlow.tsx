@@ -9,6 +9,8 @@ import type { AgentTask, HubChange, PrepareResult } from "@/lib/client/types";
 import { ErrorNote } from "../../States";
 import { AgentTrace } from "./AgentTrace";
 import { PrepareResultView } from "./PrepareResultView";
+import { DatePicker } from "../../ui/DatePicker";
+import { Select } from "../../ui/Select";
 
 const PURPOSES = [
   "Hand in missing documents after a wezwanie",
@@ -16,6 +18,9 @@ const PURPOSES = [
   "Collect the residence card (odbiór karty)",
   "Ask about the status of my case",
 ];
+
+const OFFICE_OPTIONS = OFFICES.map((o) => ({ value: o, label: o.replace("Wydział Spraw Cudzoziemców MUW - ", "Mazowiecki · "), description: o.replace(" - ", " · ") }));
+const PURPOSE_OPTIONS = PURPOSES.map((p) => ({ value: p, label: p }));
 
 const plusDays = (n: number) => {
   const d = new Date();
@@ -71,22 +76,18 @@ export function PrepareFlow() {
       </div>
 
       <form className="card stack prep-form" onSubmit={(e) => void run(e)} style={{ ["--gap" as string]: "14px" }}>
-        <label className="field">
-          <span>Office</span>
-          <select className="input" value={office} onChange={(e) => setOffice(e.target.value)}>
-            {OFFICES.map((o) => <option key={o} value={o}>{o.replace("Wydział Spraw Cudzoziemców MUW - ", "Mazowiecki · ")}</option>)}
-          </select>
-        </label>
-        <label className="field">
-          <span>What is the appointment for?</span>
-          <select className="input" value={purpose} onChange={(e) => setPurpose(e.target.value)}>
-            {PURPOSES.map((p) => <option key={p}>{p}</option>)}
-          </select>
-        </label>
-        <label className="field">
-          <span>Date</span>
-          <input className="input mono" type="date" value={date} min={todayIso()} onChange={(e) => setDate(e.target.value)} required style={{ maxWidth: 220 }} />
-        </label>
+        <div className="field">
+          <span id="prep-office-label">Office</span>
+          <Select id="prep-office" labelledBy="prep-office-label" value={office} onChange={setOffice} options={OFFICE_OPTIONS} />
+        </div>
+        <div className="field">
+          <span id="prep-purpose-label">What is the appointment for?</span>
+          <Select id="prep-purpose" labelledBy="prep-purpose-label" value={purpose} onChange={setPurpose} options={PURPOSE_OPTIONS} />
+        </div>
+        <div className="field">
+          <span id="prep-date-label">Date</span>
+          <DatePicker id="prep-date" labelledBy="prep-date-label" value={date} min={todayIso()} onChange={setDate} />
+        </div>
         <button className="btn btn-primary" disabled={busy}>{busy ? "Your agent is working…" : result ? "Prepare again" : "Prepare my checklist"}</button>
       </form>
 
