@@ -42,6 +42,30 @@ Token Factory features in use: structured JSON output with zod validation and on
 
 **Hosting.** Production runs on a Nebius CPU VM pool in eu-north1 (about $104 a month per VM). Before revenue we cannot carry that bill, so the personal agents run on our own local hardware until our first 10–20 users. The web app runs on Cloudflare Workers behind Cloudflare Pages.
 
+## Fine-tuned letter reader (LoRA)
+
+We fine-tuned an NVIDIA open model to read the letters Dossierly's users receive: a Polish administrative letter in, structured JSON out (document type, issuing office, case number, required action in short English, deadline in days, what the days are counted from, and the deadline date for a given delivery date). The deadline date follows Polish civil-procedure counting: the day of the event is not counted, and a last day that falls on a Saturday, a Sunday or a public holiday moves to the next working day. Everything ran as one **Nebius Serverless Job** on a single H100 in eu-north1 ([`jobs/letter-finetune/`](jobs/letter-finetune/), job `aijob-e00wg0es4gvzjh5wnj`, started from the CLI, deleted afterwards).
+
+- **Base model:** `nvidia/Llama-3.1-Nemotron-Nano-4B-v1.1` (4.5B parameters, loads in plain transformers), licensed under the NVIDIA Open Model License (built on Llama 3.1). LoRA with peft: rank 16, alpha 32, all attention and MLP projections, bf16, 2 epochs, 200 steps at batch 8, **189 s of training**; the whole job took about 13 minutes including provisioning, roughly **$0.97 of GPU** at an assumed list price of $4.50 per H100-hour.
+- **Data:** 800 training and 200 test letters written by **Nemotron 3.5 Lightning on Token Factory** (thinking off, `store: false`), each from a structured spec sampled in code (offices of the Mazowieckie, Małopolskie and Dolnośląskie foreigners' departments, seven case-number formats, 7, 14 and 30 day deadlines, fictional names, distractor dates in the text). The **labels are the spec**, and the deadline date is computed in code from the Polish holiday calendar, never by a model. The office header, date and case number are inserted by code so labels are verbatim; letters that miss the deadline wording or the action words are dropped (157 of 1,340 calls, 11.7%). Token Factory cost about $0.13 (589k input and 398k output tokens at list price). No Claude-written text, no Tavily results, no personal data.
+- **Held-out test:** 200 letters from a disjoint spec pool. 92 use training-style offices and case-number formats; 108 use an office or a case-number format never seen in training. Train against test: 0 exact duplicates, 0 near-duplicates (highest word 4-gram Jaccard 0.149, threshold 0.5), 0 shared case numbers.
+- **Evaluation:** the same 200 letters, the same prompt, the same JSON parser and greedy decoding for the base model zero-shot and the tuned model, measured inside the same job.
+
+| Metric on 200 held-out letters | Base, zero-shot | Tuned (LoRA) |
+|---|---|---|
+| Valid JSON | 99.0% | 100% |
+| All seven fields correct | 1.0% | **87.5%** |
+| Document type | 85.0% | 100% |
+| Issuing office | 50.5% | 91.5% |
+| Case number | 98.0% | 99.5% |
+| Required action | 14.5% | 99.0% |
+| Deadline in days | 84.5% | 100% |
+| Counted from | 76.5% | 100% |
+| **Deadline date, exact** | 19.5% | **97.5%** |
+| Deadline date, when the last day rolled to a working day (108 letters) | 6 of 108 | 106 of 108 |
+
+Honest caveats. The data is synthetic and written by one model, the test set is small (200 letters, so one letter is half a point), and the test letters come from the same generator as the training letters, so the numbers show what the tuning learns on this letter family, not a guarantee on every real letter. All-fields-correct is 94.6% on the training-style test pool and 81.5% on the pool with unseen offices and case-number formats. Both models see the same prompt, which lists the allowed actions and the Polish holidays and asks for three scratch fields (start date, raw last day, weekday) that are not scored; the base model is not prompt-tuned beyond that, and office is compared ignoring case and punctuation. **The live app still reads letters with Nemotron 3.5 Super VL on Token Factory; the adapter is not served live** (it stayed inside the job container: Token Factory does not fine-tune Nemotron and we run no always-on GPU). Raw result: [`jobs/letter-finetune/result.json`](jobs/letter-finetune/result.json).
+
 ## Partners
 
 **Tavily** Search, Extract and Map, restricted to official Polish domains, power Prepare and the official-pages watch. Every result is cached by query or URL, there is a daily credit cap, and nothing calls Tavily on page load. The watch runs as a Cloudflare cron Workflow: Tavily, then a Lightning summary of any change. It found the real 19 Oct 2026 announcement that a certificate now replaces the passport stamp.
