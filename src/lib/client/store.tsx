@@ -116,6 +116,7 @@ export function CaseProvider({ children }: { children: React.ReactNode }) {
     wipe: async () => {
       await destroyVault();
       ref.current = null;
+      setPhase("loading");
       setDossier(null);
       await load();
     },

@@ -6,7 +6,7 @@ import { z } from "zod";
 /** A queued task unclaimed this long is run in the cloud with Super VL instead. */
 export const FALLBACK_AFTER_MS = 20_000;
 /** A sandbox claim with no result this long is taken over by the cloud. */
-export const STALE_CLAIM_MS = 300_000;
+export const STALE_CLAIM_MS = 180_000;
 const MAX_INPUT_BYTES = 250_000;
 
 export type TaskStatus = "queued" | "running" | "done" | "failed";

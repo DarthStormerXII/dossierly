@@ -111,7 +111,7 @@ export async function pollTask<R>(
   signal: AbortSignal,
   intervalMs = 1200,
 ): Promise<ApiResult<AgentTask<R>>> {
-  for (let i = 0; i < 150 && !signal.aborted; i++) {
+  for (let i = 0; i < 300 && !signal.aborted; i++) {
     const r = await api.task<R>(id);
     if (!r.ok) {
       if (isRateLimited(r) || r.status === 0) {
