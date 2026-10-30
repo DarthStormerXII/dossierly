@@ -30,30 +30,27 @@ export function Onboarding() {
 
   return (
     <div className="onboard">
-      <div className="stack">
+      <div className="stack" style={{ ["--gap" as string]: "8px" }}>
         <span className="tab-label">New case · Poland</span>
-        <h1>Open a case file</h1>
-        <p className="muted lead">Your case lives on this device, encrypted. Your private agent keeps a masked copy in its own sandbox so it can remember, and our servers keep a ledger of every call it makes.</p>
+        <h1 style={{ margin: 0 }}>Let&apos;s open your case file</h1>
+        <p className="muted lead" style={{ margin: 0 }}>Your case lives on this device, encrypted. Your private agent keeps a masked copy in its own sandbox so it can remember.</p>
       </div>
 
-      <section className="card sample-card stack" aria-labelledby="sample-h">
-        <div className="row between">
-          <h2 id="sample-h" style={{ margin: 0 }}>Arjun&apos;s case</h2>
-          <span className="stamp">SAMPLE</span>
+      <section className="sample-photo" aria-labelledby="sample-h">
+        <div className="sample-photo-img" aria-hidden="true" />
+        <div className="sample-photo-body">
+          <span className="sample-photo-tag">Sample case · fictional person, real procedure</span>
+          <h2 id="sample-h">Arjun Raman</h2>
+          <p>Temporary residence and work · Mazowiecki office, Warsaw · fingerprints taken on 18 Sep, a letter is on its way.</p>
+          <button className="sample-photo-btn" onClick={() => void startSample()}>
+            <span>Explore the sample case</span>
+            <span className="sample-photo-arrow" aria-hidden="true">→</span>
+          </button>
         </div>
-        <p className="muted small" style={{ margin: 0 }}>Fictional person, real procedure. Try every feature before using your own details.</p>
-        <dl className="facts">
-          <div><dt>Applicant</dt><dd>Arjun Raman</dd></div>
-          <div><dt>Permit</dt><dd>Temporary residence and work</dd></div>
-          <div><dt>Office</dt><dd>Mazowiecki, Marszałkowska 3/5</dd></div>
-          <div><dt>Case signature</dt><dd className="mono">WSC-II-P.6151.48213.2026</dd></div>
-          <div><dt>So far</dt><dd>Applied via MOS on 2 Jun · fingerprints 18 Sep, where the official said health insurance proof is missing and a letter will follow</dd></div>
-        </dl>
-        <button className="btn btn-primary btn-block" onClick={() => void startSample()}>Open the sample case</button>
       </section>
 
-      <form className="card stack" onSubmit={own} aria-labelledby="own-h">
-        <h2 id="own-h" style={{ margin: 0 }}>Start my own case</h2>
+      <form className="card stack own-form" onSubmit={own} aria-labelledby="own-h">
+        <h2 id="own-h" style={{ margin: 0 }}>Or start my own case</h2>
         <label className="field">
           <span>Your name</span>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required maxLength={80} placeholder="As written in your passport" />
@@ -76,7 +73,7 @@ export function Onboarding() {
           </select>
         </label>
         <p className="tiny muted" style={{ margin: 0 }}>Poland only for now: temporary residence and work in the Mazowieckie voivodeship. Germany and France are next.</p>
-        <button className="btn btn-block" disabled={busy || !name.trim()}>Create my case</button>
+        <button className="btn btn-block btn-primary" disabled={busy || !name.trim()}>Create my case</button>
       </form>
     </div>
   );

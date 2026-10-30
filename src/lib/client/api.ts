@@ -12,13 +12,13 @@ export const isRateLimited = (f: ApiFailure) => f.status === 429 || f.code === "
 
 export function friendlyError(f: ApiFailure): string {
   if (isRateLimited(f)) return "Lots of requests just now. Wait a few seconds and try again.";
-  if (needsPlan(f)) return "This needs a Case Pass or credits.";
+  if (needsPlan(f)) return "You have reached the free limit. Upgrade to Dossierly Plus to continue.";
   if (f.status === 0) return "You seem to be offline. Check the connection and try again.";
   if (f.code === "over_budget") return "Today's live model budget is used up; showing a recorded answer instead.";
   return f.error || "Something went wrong. Try again.";
 }
 
-let sessionPromise: Promise<ApiResult<Me>> | null = null;
+let sessionPromise: Promise<ApiResult<AccountMe>> | null = null;
 
 async function raw<T>(path: string, init?: RequestInit): Promise<ApiResult<T>> {
   let res: Response;
@@ -42,10 +42,31 @@ async function raw<T>(path: string, init?: RequestInit): Promise<ApiResult<T>> {
   return { ok: false, status: res.status, error: b.error ?? `Request failed (${res.status})`, code: b.code };
 }
 
-/** Idempotent: the server reuses a valid cookie. Concurrent callers share one request. */
-export function ensureSession(): Promise<ApiResult<Me>> {
+/** The signed-in account as returned by /api/me, /api/session and every sign-in route. */
+export type Account = {
+  accountId: string;
+  accountKind: "passkey" | "device";
+  activeCase: "own" | "sample";
+  plan: Plan;
+  planChosen: boolean;
+  lettersUsed: number;
+  freeLetters: number;
+};
+
+/** Account plus the legacy `Me` fields (`userId` = accountId, `freeLetterUsed`) the older store reads. */
+export type AccountMe = Account & Me;
+const withLegacy = (a: Account): AccountMe => ({ ...a, userId: a.accountId, freeLetterUsed: a.lettersUsed > 0 });
+const mapAccount = (r: ApiResult<Account>): ApiResult<AccountMe> => (r.ok ? { ok: true, data: withLegacy(r.data) } : r);
+
+/** Safe to call anywhere: a missing account is a 401 `no_session` result, never a created user. */
+export function getMe(): Promise<ApiResult<AccountMe>> {
+  return raw<Account>("/api/me").then(mapAccount);
+}
+
+/** Bootstrap helper kept for the store: resolves the current account (shared by concurrent callers). */
+export function ensureSession(): Promise<ApiResult<AccountMe>> {
   if (!sessionPromise) {
-    sessionPromise = raw<Me>("/api/session", { method: "POST" }).then((r) => {
+    sessionPromise = getMe().then((r) => {
       if (!r.ok) sessionPromise = null;
       return r;
     });
@@ -53,12 +74,74 @@ export function ensureSession(): Promise<ApiResult<Me>> {
   return sessionPromise;
 }
 
-/** Switches identity: {sample:true} joins the shared SAMPLE user, {sample:false} creates a fresh private user. */
-export async function startSession(sample: boolean): Promise<ApiResult<Me>> {
-  const r = await raw<Me>("/api/session", { method: "POST", body: JSON.stringify({ sample }) });
-  sessionPromise = r.ok ? Promise.resolve(r) : null;
+const postAccount = async (path: string, body: unknown): Promise<ApiResult<Account>> => {
+  const r = await raw<Account>(path, { method: "POST", body: JSON.stringify(body) });
+  sessionPromise = r.ok ? Promise.resolve({ ok: true, data: withLegacy(r.data) }) : null;
+  return r;
+};
+
+/** Switches the active case of the signed-in account: sample=true joins the shared SAMPLE case, false returns to your own. */
+export const switchCase = (sample: boolean): Promise<ApiResult<Account>> => postAccount("/api/session", { sample });
+
+/** Same call as `switchCase`, returning the legacy `Me` fields too, for the existing store. */
+export async function startSession(sample: boolean): Promise<ApiResult<AccountMe>> {
+  return mapAccount(await switchCase(sample));
+}
+
+export const passkeySupported = (): boolean => typeof window !== "undefined" && !!window.PublicKeyCredential;
+
+/** Codes: `cancelled` (prompt closed), `exists` (this device already has a passkey), `unsupported`, `no_credential` (sign-in found no account). */
+async function ceremony(run: () => Promise<ApiResult<Account>>, signIn: boolean): Promise<ApiResult<Account>> {
+  try {
+    const r = await run();
+    return !r.ok && r.code === "passkey_unknown" ? { ...r, code: "no_credential" } : r;
+  } catch (e) {
+    const name = (e as { name?: string })?.name;
+    if (name === "NotAllowedError" || name === "AbortError") {
+      return { ok: false, status: 0, error: signIn ? "No passkey was chosen" : "The passkey prompt was closed or timed out", code: "cancelled" };
+    }
+    if (name === "InvalidStateError") return { ok: false, status: 409, error: "This device already has a Dossierly passkey. Sign in instead.", code: "exists" };
+    return { ok: false, status: 0, error: "Passkeys are not available in this browser", code: "unsupported" };
+  }
+}
+
+/** Creates a passkey account (no email, no password) and signs in. */
+export function passkeySignUp(label?: string): Promise<ApiResult<Account>> {
+  return ceremony(async () => {
+    const { startRegistration } = await import("@simplewebauthn/browser");
+    const opts = await raw<{ pendingId: string; options: Parameters<typeof startRegistration>[0]["optionsJSON"] }>(
+      "/api/auth/passkey/register/options", { method: "POST", body: JSON.stringify(label ? { label } : {}) },
+    );
+    if (!opts.ok) return opts;
+    const response = await startRegistration({ optionsJSON: opts.data.options });
+    return postAccount("/api/auth/passkey/register/verify", { pendingId: opts.data.pendingId, response });
+  }, false);
+}
+
+/** Signs in with an existing Dossierly passkey (discoverable: no username to type). */
+export function passkeySignIn(): Promise<ApiResult<Account>> {
+  return ceremony(async () => {
+    const { startAuthentication } = await import("@simplewebauthn/browser");
+    const opts = await raw<{ challengeId: string; options: Parameters<typeof startAuthentication>[0]["optionsJSON"] }>(
+      "/api/auth/passkey/login/options", { method: "POST", body: "{}" },
+    );
+    if (!opts.ok) return opts;
+    const response = await startAuthentication({ optionsJSON: opts.data.options });
+    return postAccount("/api/auth/passkey/login/verify", { challengeId: opts.data.challengeId, response });
+  }, true);
+}
+
+/** "Continue on this device": an account without a passkey, tied to this browser's cookie. */
+export const deviceSignUp = (): Promise<ApiResult<Account>> => postAccount("/api/auth/device", {});
+
+export async function signOut(): Promise<ApiResult<{ ok: true }>> {
+  const r = await raw<{ ok: true }>("/api/auth/signout", { method: "POST", body: "{}" });
+  if (r.ok) sessionPromise = null;
   return r;
 }
+
+/** The one-time tier choice. Choosing Plus starts a checkout instead (`api.checkout("case_pass")`). */
+export const choosePlan = (choice: "free"): Promise<ApiResult<Account>> => postAccount("/api/me/plan", { choice });
 
 /** Sandbox names are internal ids; show only the pool slot (e.g. "pool-03"). */
 export function sandboxLabel(name?: string | null): string {
@@ -66,22 +149,15 @@ export function sandboxLabel(name?: string | null): string {
   return name.replace(/^settla[-_]?/i, "").replace(/^companion-arjun$/, "sample agent");
 }
 
-/** Fetch with typed results; a missing session is created once and the call retried. */
-export async function call<T>(path: string, init?: RequestInit): Promise<ApiResult<T>> {
-  const first = await raw<T>(path, init);
-  if (first.ok || first.status !== 401 || first.code !== "no_session") return first;
-  sessionPromise = null;
-  const s = await ensureSession();
-  if (!s.ok) return s;
-  return raw<T>(path, init);
-}
+/** Fetch with typed results. A 401 `no_session` is returned as is: the UI sends the person to sign in. */
+export const call = raw;
 
 const post = <T>(path: string, body: unknown) => call<T>(path, { method: "POST", body: JSON.stringify(body) });
 
 const maskProfile = (c: Case) => ({ name: c.profile.name, addresses: c.profile.addresses ?? [] });
 
 export const api = {
-  me: () => call<Me>("/api/me"),
+  me: getMe,
   status: () => call<Status>("/api/status"),
   ledger: () => call<Ledger>("/api/ledger?limit=200"),
   intro: (name: string, language: Language, office: string) => post<Intro>("/api/intro", { name, language, office }),

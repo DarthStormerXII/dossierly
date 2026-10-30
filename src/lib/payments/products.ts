@@ -3,7 +3,12 @@ import type { Env } from "@/lib/server/env";
 export const PRODUCTS = ["case_pass", "credits_10", "credits_25", "family"] as const;
 export type Product = (typeof PRODUCTS)[number];
 
-/** Case Pass: 149 PLN / 35 EUR / 39 USD one-time. Credits 10 = 59 PLN, 25 = 129 PLN. Family add-on = 59 PLN. */
+/**
+ * Live Dodo products (USD, one-time, brand Dossierly):
+ *  case_pass = "Dossierly Plus" USD 39.00, one residence case for 18 months: pdt_0Nqr5MdtcQ1vyQXIRVKZi
+ *  family    = "Dossierly Family add-on" USD 15.00: pdt_0Nqr5MjRO1c3BU4tlKY88
+ * The credits products are legacy: no longer sold, still granted if an old webhook arrives.
+ */
 export function productId(env: Env, product: Product): string {
   const map: Record<Product, string> = {
     case_pass: env.DODO_PRODUCT_CASE_PASS,

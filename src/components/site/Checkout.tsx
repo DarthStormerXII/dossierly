@@ -1,22 +1,34 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api, friendlyError } from "@/lib/client/api";
-import type { Plan, Product } from "@/lib/client/types";
-import { PlanGrid } from "./PlanGrid";
+import { api, choosePlan, friendlyError } from "@/lib/client/api";
+import { useCase } from "@/lib/client/store";
+import type { Product } from "@/lib/client/types";
+import { FamilyAddon, PlanGrid } from "./PlanGrid";
 
-const PLAN_NAME: Record<Plan["kind"], string> = { free: "Free", case_pass: "Case Pass", judge: "Judge access" };
-
-export function Checkout() {
+/** The one-time plan step after onboarding: Free goes straight into the case, Plus opens Dodo checkout. */
+export function Checkout({ suggest }: { suggest?: "plus" }) {
+  const router = useRouter();
+  const { refreshMe } = useCase();
   const [consent, setConsent] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; ok?: boolean } | null>(null);
+  const [discount, setDiscount] = useState<string | null>(null);
+
+  const free = async () => {
+    setBusy("free");
+    const r = await choosePlan("free");
+    setBusy(null);
+    if (!r.ok) return setMsg({ text: friendlyError(r) });
+    await refreshMe();
+    router.replace("/app");
+  };
 
   const buy = async (product: Product) => {
     if (!consent) {
-      setMsg({ text: "Tick the box above first: it confirms you want access to start straight away." });
+      setMsg({ text: "Tick the box below the plans first: it confirms you want access to start straight away." });
       document.getElementById("consent")?.focus();
       return;
     }
@@ -35,41 +47,41 @@ export function Checkout() {
     setMsg(null);
     const r = await api.redeem(code.trim());
     setBusy(null);
-    if (!r.ok) return setMsg({ text: r.code === "invalid_code" || r.status === 400 || r.status === 404 ? "That code is not valid. You can still use it at checkout if it is a discount code." : friendlyError(r) });
-    setMsg({ text: `Code applied: ${PLAN_NAME[r.data.plan.kind] ?? r.data.plan.kind}${r.data.plan.creditsLeft ? ` · ${r.data.plan.creditsLeft} credits` : ""}. Your case is unlocked.`, ok: true });
+    if (!r.ok && (r.code === "invalid_code" || r.status === 404)) {
+      // Not an in-app access code: keep it as a discount code for the Dodo checkout.
+      setDiscount(code.trim());
+      return setMsg({ text: `Code ${code.trim()} saved. It is applied when you continue to Plus.`, ok: true });
+    }
+    if (!r.ok) return setMsg({ text: friendlyError(r) });
+    setMsg({ text: "Code applied: Plus is unlocked for your case.", ok: true });
+    await refreshMe();
+    setTimeout(() => router.replace("/app"), 900);
   };
 
   return (
-    <div className="stack" style={{ ["--gap" as string]: "20px" }}>
-      <form className="card code-form" onSubmit={redeem} aria-label="Redeem a code">
-        <label className="field" style={{ flex: 1 }}>
-          <span>Have a code?</span>
-          <input className="input mono" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="CODE" autoComplete="off" maxLength={40} />
-        </label>
-        <button className="btn" disabled={!code.trim() || busy !== null}>{busy === "redeem" ? "Checking…" : "Apply"}</button>
-      </form>
-
-      <label className="check card consent">
-        <input id="consent" type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} required />
-        <span>I want immediate access and understand I lose my 14-day withdrawal right once the service starts.</span>
-      </label>
-
-      {msg && <div className={msg.ok ? "notice notice-calm" : "error-box"} role="status">{msg.text}{msg.ok && <> <Link href="/app">Open my case →</Link></>}</div>}
-
+    <div className="stack" style={{ ["--gap" as string]: "16px" }}>
       <PlanGrid
         action={(p) =>
           p === "free" ? (
-            <Link className="btn btn-small" href="/app/letters">Read a letter</Link>
+            <button className="btn btn-block" onClick={() => void free()} disabled={busy !== null}>{busy === "free" ? "Opening your case…" : "Start free"}</button>
           ) : (
-            <button className={`btn btn-small${p === "case_pass" ? " btn-primary" : ""}`} onClick={() => void buy(p as Product)} disabled={busy !== null} aria-disabled={!consent}>
-              {busy === p ? "Opening checkout…" : "Buy"}
+            <button className="btn btn-block btn-primary" onClick={() => void buy(p as Product)} disabled={busy !== null} aria-describedby="consent-text">
+              {busy === p ? "Opening checkout…" : discount ? "Continue to Plus with your code" : suggest === "plus" ? "Continue to payment" : "Get Plus · $39"}
             </button>
           )
         }
       />
-      <p className="small muted" style={{ margin: 0 }}>
-        Prices in PLN. Payment, invoices and VAT are handled by our payment provider and merchant of record, Dodo Payments. A card is charged once; nothing renews.
-      </p>
+      <label className="check consent-row">
+        <input id="consent" type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+        <span id="consent-text" className="small">For Plus: I want access to start straight away and understand I lose my 14-day withdrawal right once it starts.</span>
+      </label>
+      <form className="code-row" onSubmit={redeem} aria-label="Redeem a code">
+        <input className="input mono" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Have a code?" aria-label="Code" autoComplete="off" maxLength={40} />
+        <button className="btn" disabled={!code.trim() || busy !== null}>{busy === "redeem" ? "Checking…" : "Apply"}</button>
+      </form>
+      {msg && <div className={msg.ok ? "notice notice-calm" : "error-box"} role="status">{msg.text}</div>}
+      <FamilyAddon />
+      <p className="tiny muted" style={{ margin: 0 }}>Prices in US dollars; checkout shows your currency and local methods such as BLIK and Przelewy24. Dodo Payments is the merchant of record. Charged once; nothing renews.</p>
     </div>
   );
 }

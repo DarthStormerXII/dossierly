@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { JUDGE_EXPIRES_MS, REDEEM_CAP, redeemJudgeCode } from "@/lib/payments/redeem";
 import { freshLocalEnv } from "@/lib/server/local";
-import { createSession, loadUserState, requireUser, userIdFromRequest } from "@/lib/server/session";
+import { getEnv } from "@/lib/server/env";
+import { createAccountUser, loadUserState, requireUser, sessionCookie, userIdFromRequest } from "@/lib/server/session";
 
 const CODE = "SETTLA-JUDGE-TEST-1234";
 
@@ -32,14 +33,17 @@ describe("judge code redemption", () => {
 });
 
 describe("session cookie", () => {
-  it("round-trips, and rejects forged cookies", async () => {
-    const { userId, cookie } = await createSession();
+  it("round-trips for an account, and rejects forged cookies", async () => {
+    const env = getEnv();
+    await createAccountUser(env, "u_round", "device");
+    const cookie = await sessionCookie("u_round", env);
     expect(cookie).toMatch(/^settla_uid=.+; Path=\/; HttpOnly; SameSite=Lax/);
     const value = cookie.split(";")[0];
     const ok = await requireUser(new Request("http://x", { headers: { cookie: value } }));
-    expect(ok.userId).toBe(userId);
+    expect(ok.userId).toBe("u_round");
+    expect(ok.accountId).toBe("u_round");
     expect(ok.plan.kind).toBe("free");
-    const forged = value.replace(userId, "u_attacker");
+    const forged = value.replace("u_round", "u_attacker");
     await expect(requireUser(new Request("http://x", { headers: { cookie: forged } }))).rejects.toMatchObject({ status: 401 });
     expect(await userIdFromRequest(new Request("http://x"), freshLocalEnv())).toBeNull();
   });

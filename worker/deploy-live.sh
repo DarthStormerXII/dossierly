@@ -12,9 +12,9 @@ npx wrangler secret put DODO_WEBHOOK_KEY < "$WH"
 npx opennextjs-cloudflare build
 npx wrangler deploy \
   --var DODO_ENV:live \
-  --var DODO_PRODUCT_CASE_PASS:pdt_0NqoA4iCE42OWe1V9UQNB \
+  --var DODO_PRODUCT_CASE_PASS:pdt_0Nqr5MdtcQ1vyQXIRVKZi \
   --var DODO_PRODUCT_CREDITS_10:pdt_0NqoA4ozmK8SBWGyrzjlR \
   --var DODO_PRODUCT_CREDITS_25:pdt_0NqoA51Fn18zGeSXbmpzn \
-  --var DODO_PRODUCT_FAMILY:pdt_0NqoA5AyeBsacPCcz5VhO \
+  --var DODO_PRODUCT_FAMILY:pdt_0Nqr5MjRO1c3BU4tlKY88 \
   --var APP_ENV:production \
   --var APP_URL:https://dossierly.pages.dev

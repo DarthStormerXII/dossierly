@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { signOut } from "@/lib/client/api";
 import { CaseProvider, useCase } from "@/lib/client/store";
 import { Icon, type IconName } from "../Icon";
 import { Logo } from "../Logo";
@@ -52,9 +54,26 @@ function Body({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** After onboarding, everyone picks Free or Plus once; until then the app routes to the plan step. */
+function usePlanStep() {
+  const { phase, me } = useCase();
+  const path = usePathname();
+  const router = useRouter();
+  useEffect(() => {
+    if (phase !== "ready" || !me || me.planChosen !== false || path === "/app/plan") return;
+    const plus = new URLSearchParams(window.location.search).get("plan") === "plus";
+    router.replace(plus ? "/app/plan?plan=plus" : "/app/plan");
+  }, [phase, me, path, router]);
+}
+
 function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { dossier } = useCase();
+  usePlanStep();
+  const leave = async () => {
+    await signOut();
+    window.location.assign("/");
+  };
   return (
     <div className="app">
       <header className="app-header">
@@ -63,6 +82,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         {dossier?.sample && <span className="stamp" title="Fictional sample case">SAMPLE</span>}
         <span className="grow" />
         <AgentBadge />
+        <button className="btn btn-ghost btn-small signout" onClick={() => void leave()} title="Sign out">Sign out</button>
       </header>
       <nav className="app-nav" aria-label="Case sections">
         {NAV.map((n) => {
@@ -85,6 +105,8 @@ function Shell({ children }: { children: React.ReactNode }) {
           <Link href="/legal/privacy">Privacy</Link>
           <Link href="/limits">Limits</Link>
           <Link href="/countries">Countries</Link>
+          <Link href="/app/plan">Plan</Link>
+          <button className="linkish" onClick={() => void leave()}>Sign out</button>
         </span>
       </footer>
     </div>

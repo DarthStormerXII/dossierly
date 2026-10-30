@@ -38,8 +38,8 @@ Case { id, country: "pl", type: "temporary_residence_work", office: string, case
 
 ## API contract (all JSON; every model-backed response includes `run`)
 `run = { model, ms, tokensIn, tokensOut, cachedTokens, costUsd, ranOn: "cloud"|"sandbox"|"replay" }` (array `runs` when several calls).
-- `POST /api/session` → `{ userId, plan: { kind: "free"|"case_pass"|"judge", creditsLeft }, freeLetterUsed }` (sets httpOnly signed cookie)
-- `GET /api/me` → same
+- Accounts (passkey or device, no email/password; cookie `settla_uid` is an account only if its user row has `account_kind`): `POST /api/auth/passkey/register/{options,verify}`, `POST /api/auth/passkey/login/{options,verify}`, `POST /api/auth/device`, `POST /api/auth/signout`
+- `GET /api/me` → `{ accountId, accountKind, activeCase:"own"|"sample", plan:{kind,creditsLeft}, planChosen, lettersUsed, freeLetters:3 }` (401 `no_session` without an account); `POST /api/me/plan {choice:"free"}`; `POST /api/session {sample:boolean}` switches the active case (never creates users) and returns the same payload
 - `POST /api/intro {name, language, office}` → `{ local, english, run }`
 - `POST /api/interpret {speaker:"user"|"official", text, language, recent[]}` → `{ translation, adviceNotice, masked: number, run }`
 - `POST /api/watch {turns[], language}` → `{ issues:[{kind, quote, explanation, clarifyLocal, clarifyUser}], run }`
@@ -52,7 +52,7 @@ Case { id, country: "pl", type: "temporary_residence_work", office: string, case
 - `GET /api/agent/tasks/:id` → `{ status:"queued"|"running"|"done"|"failed", ranOn, sandbox?, trace:[{step, tool?, ms}], result? }`; prepare result `{ checklist:[{item, status:"have"|"missing"|"check", citation:{url,title,quote}}], phrases:[{local, user}], changes:[{title, summary, url, detectedAt}] }`
 - `GET /api/ledger` → `{ entries:[{ts, kind:"model"|"egress"|"job", what, region?, action?, bytes?, masked?, hash}], root }`
 - `GET /api/hub/changes?country=pl`, `GET /api/hub/country/pl` (coverage: offices, letter types, sources, languages)
-- `POST /api/checkout {product:"case_pass"|"credits_10"|"credits_25"|"family", code?}` → `{ checkoutUrl }`; `POST /api/redeem {code}` → `{ plan }`; `POST /api/webhooks/dodo`
+- `POST /api/checkout {product:"case_pass"|"family", code?}` (Plus USD 39, Family USD 15; credits no longer sold) → `{ checkoutUrl }`; `POST /api/redeem {code}` → `{ plan }`; `POST /api/webhooks/dodo`
 - `GET /api/limits` (eval/audit numbers) · `GET /api/status` → `{ models, bridge:{online, lastSeen, sandboxes}, budgets }`
 
 ## Ownership (do not edit outside your lane; ask the coordinator)

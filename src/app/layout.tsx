@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Atkinson_Hyperlegible_Mono, Atkinson_Hyperlegible_Next } from "next/font/google";
+import { Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "./site.css";
 import "./landing.css";
@@ -7,8 +7,8 @@ import "./app.css";
 import "./features.css";
 import "./meet.css";
 
-const text = Atkinson_Hyperlegible_Next({ subsets: ["latin", "latin-ext"], variable: "--font-text", display: "swap", adjustFontFallback: false });
-const mono = Atkinson_Hyperlegible_Mono({ subsets: ["latin", "latin-ext"], variable: "--font-mono", display: "swap", adjustFontFallback: false });
+const text = Instrument_Sans({ subsets: ["latin", "latin-ext"], variable: "--font-text", display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin", "latin-ext"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dossierly.pages.dev"),
@@ -22,8 +22,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f2f3f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d0f13" },
+    { media: "(prefers-color-scheme: light)", color: "#f5f6f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#111315" },
   ],
 };
 

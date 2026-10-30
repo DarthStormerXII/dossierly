@@ -1,23 +1,56 @@
 import type { Metadata } from "next";
-import { Checkout } from "@/components/site/Checkout";
+import Link from "next/link";
+import { FamilyAddon, PlanGrid } from "@/components/site/PlanGrid";
 
-export const metadata: Metadata = { title: "Pricing", description: "First letter free. Case Pass 149 zł once for one residence case. Credits that never expire." };
+export const metadata: Metadata = {
+  title: "Pricing",
+  description: "Start free with three letters, appointment preparation and live interpreting. Dossierly Plus is $39 once for one residence case.",
+};
+
+const FAQ: { q: string; a: string }[] = [
+  { q: "Why once per case, not monthly?", a: "A residence case runs about a year and a half from application to decision. You pay once when you need more than the free tier, and nothing renews." },
+  { q: "What counts as a letter?", a: "Any official letter you photograph or upload that Dossierly can read. A blurry photo it cannot read does not count." },
+  { q: "Can I pay with BLIK or Przelewy24?", a: "Yes. Dodo Payments, our merchant of record, shows local methods and your currency at checkout and handles invoices and VAT." },
+  { q: "Where does my case live?", a: "On your device, encrypted. Your private agent keeps a masked copy in its own sandbox. Paying changes none of that." },
+  { q: "I'm judging the hackathon.", a: "Use the code DOSSIERLYJUDGES on the plan step after sign-up. It makes Plus free." },
+];
 
 export default async function PricingPage({ searchParams }: { searchParams: Promise<{ reason?: string }> }) {
   const { reason } = await searchParams;
   return (
-    <div className="wrap" style={{ paddingTop: 40 }}>
-      <div className="section-head">
-        <span className="kicker">Pricing</span>
-        <h1>Pay once for the case.</h1>
-        <p>Your first letter is free. A residence case usually means several letters and a few visits over 18 months; the Case Pass covers them.</p>
-      </div>
-      {reason === "letters" && (
-        <div className="notice notice-calm" style={{ marginBottom: 20, maxWidth: 720 }}>
-          Your free letter has been used. A Case Pass or one credit reads the next one. Your case and its deadlines stay on your device either way.
+    <div className="pricing-page">
+      <div className="wrap">
+        <header className="pricing-head">
+          <span className="kicker">Pricing</span>
+          <h1>Start free. Pay once per case.</h1>
+          <p className="lead muted">Everything you need for your next appointment is free. When the letters start arriving, Plus covers the whole case.</p>
+        </header>
+        {reason === "letters" && (
+          <div className="notice notice-calm pricing-notice">
+            Your three free letters are used. Plus reads every letter for the rest of your case. Your case and its deadlines stay on your device either way.
+          </div>
+        )}
+        <PlanGrid />
+        <div className="pricing-under">
+          <FamilyAddon />
+          <p className="small muted">Prices in US dollars; you see your own currency at checkout. Payment, invoices and VAT are handled by Dodo Payments.</p>
         </div>
-      )}
-      <Checkout />
+        <section className="faq" aria-labelledby="faq-h">
+          <h2 id="faq-h">Questions</h2>
+          <div className="faq-list">
+            {FAQ.map((f) => (
+              <details key={f.q} className="faq-item">
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+        <div className="pricing-final">
+          <h2>Your next appointment, prepared.</h2>
+          <Link className="btn btn-primary" href="/signup">Get started free</Link>
+        </div>
+      </div>
     </div>
   );
 }

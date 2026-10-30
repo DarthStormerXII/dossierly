@@ -1,39 +1,34 @@
 import { z } from "zod";
 import { getEnv } from "@/lib/server/env";
-import { errorResponse } from "@/lib/server/http";
-import { createSession, loadUserState, userIdFromRequest } from "@/lib/server/session";
+import { ApiError, errorResponse } from "@/lib/server/http";
+import { mePayload, setActiveCase } from "@/lib/server/me";
+import { requireUserState } from "@/lib/server/session";
 
 export const dynamic = "force-dynamic";
 
-/** The SAMPLE case is one shared demo user whose private agent is the pinned `companion-arjun` sandbox. */
-const SAMPLE_USER_ID = "sample-arjun";
-
-const BodySchema = z.object({ sample: z.boolean().optional() }).default({});
+const body = z.object({ sample: z.boolean().optional() });
 
 /**
- * Idempotent: reuses a valid cookie, otherwise creates a user and sets the session cookie.
- * `{ sample: true }` switches to the shared SAMPLE user; `{ sample: false }` leaves it for a fresh own user.
+ * No longer creates users. With a valid account it switches the active case:
+ * `{ sample: true }` joins the shared SAMPLE case, `{ sample: false }` returns to the account's own case.
  */
 export async function POST(req: Request) {
   try {
-    const env = getEnv();
+    const state = await requireUserState(req);
     const raw = await req.text();
-    const parsed = BodySchema.safeParse(raw ? JSON.parse(raw) : {});
-    if (!parsed.success) return Response.json({ error: "Invalid request", code: "bad_request" }, { status: 400 });
-    const wantSample = parsed.data.sample;
-
-    const existing = await userIdFromRequest(req, env);
-    const isSample = existing === SAMPLE_USER_ID;
-    const keep = existing && (wantSample === undefined || wantSample === isSample);
-    const state = keep ? await loadUserState(env, existing) : null;
-    if (state) return Response.json({ userId: state.userId, plan: state.plan, freeLetterUsed: state.freeLetterUsed });
-
-    const { userId, cookie } = await createSession(wantSample ? SAMPLE_USER_ID : undefined);
-    const fresh = await loadUserState(env, userId);
-    return Response.json(
-      { userId, plan: fresh!.plan, freeLetterUsed: fresh!.freeLetterUsed },
-      { headers: { "set-cookie": cookie, "cache-control": "no-store" } },
-    );
+    let json: unknown = {};
+    try {
+      json = raw ? JSON.parse(raw) : {};
+    } catch {
+      throw new ApiError(400, "Request body must be JSON", "invalid_json");
+    }
+    const { sample } = body.parse(json);
+    if (sample !== undefined) {
+      const activeCase = sample ? "sample" : "own";
+      await setActiveCase(getEnv(), state.accountId, activeCase);
+      state.activeCase = activeCase;
+    }
+    return Response.json(mePayload(state), { headers: { "cache-control": "no-store" } });
   } catch (e) {
     return errorResponse(e);
   }

@@ -18,7 +18,7 @@ export function ErrorNote({ failure, onRetry }: { failure: ApiFailure | string; 
     <div className="error-box stack" role="alert" style={{ ["--gap" as string]: "10px" }}>
       <p style={{ margin: 0 }}>{text}</p>
       <div className="row">
-        {plan && <Link className="btn btn-primary btn-small" href="/pricing">See plans</Link>}
+        {plan && <Link className="btn btn-primary btn-small" href="/app/plan">See plans</Link>}
         {onRetry && <button className="btn btn-small" onClick={onRetry}>Try again</button>}
       </div>
     </div>

@@ -1,0 +1,150 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const letterResult = vi.hoisted(() => ({ readable: true }));
+vi.mock("@/lib/features/letters", () => ({
+  readLetter: async () => ({ letter: { readable: letterResult.readable, title: "Wezwanie" }, run: {}, runs: [] }),
+}));
+
+import { POST as readRoute } from "@/app/api/letters/read/route";
+import { POST as checkoutRoute } from "@/app/api/checkout/route";
+import { GET as meRoute } from "@/app/api/me/route";
+import { POST as planRoute } from "@/app/api/me/plan/route";
+import { POST as sessionRoute } from "@/app/api/session/route";
+import { POST as signoutRoute } from "@/app/api/auth/signout/route";
+import { POST as deviceRoute } from "@/app/api/auth/device/route";
+import { getEnv } from "@/lib/server/env";
+import { accountFromCookie, createAccountUser, ensureUser, requireUserState, sessionCookie, SAMPLE_USER_ID } from "@/lib/server/session";
+import { randomId } from "@/lib/server/util";
+
+const png = "data:image/png;base64,iVBORw0KGgo=";
+const json = (cookie: string | null, path: string, body?: unknown, method = "POST") =>
+  new Request(`http://x${path}`, { method, headers: { ...(cookie ? { cookie } : {}), "content-type": "application/json" }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+
+async function newAccount(kind: "passkey" | "device" = "device") {
+  const env = getEnv();
+  const id = randomId("u", 9);
+  await createAccountUser(env, id, kind);
+  return { id, cookie: (await sessionCookie(id, env)).split(";")[0] };
+}
+
+beforeEach(() => { letterResult.readable = true; });
+
+describe("account guard", () => {
+  it("treats legacy anonymous cookies, the sample user and unsigned cookies as no session", async () => {
+    const env = getEnv();
+    await ensureUser(env, "u_legacy"); // an old anonymous row: no account_kind
+    const legacy = (await sessionCookie("u_legacy", env)).split(";")[0];
+    await ensureUser(env, SAMPLE_USER_ID);
+    const sample = (await sessionCookie(SAMPLE_USER_ID, env)).split(";")[0];
+    for (const cookie of [legacy, sample, "settla_uid=u_x.forged", null]) {
+      await expect(requireUserState(json(cookie, "/api/me", undefined, "GET"))).rejects.toMatchObject({ status: 401, code: "no_session" });
+      const res = await meRoute(json(cookie, "/api/me", undefined, "GET"));
+      expect(res.status).toBe(401);
+      expect(await res.json()).toEqual({ error: "No active session", code: "no_session" });
+      expect(await accountFromCookie(cookie, env)).toBeNull();
+    }
+    expect((await sessionRoute(json(legacy, "/api/session", { sample: true }))).status).toBe(401);
+  });
+
+  it("POST /api/session never creates users", async () => {
+    const before = await getEnv().DB.prepare("SELECT COUNT(*) AS n FROM users").first<{ n: number }>();
+    expect((await sessionRoute(json(null, "/api/session", {}))).status).toBe(401);
+    const after = await getEnv().DB.prepare("SELECT COUNT(*) AS n FROM users").first<{ n: number }>();
+    expect(after!.n).toBe(before!.n);
+  });
+
+  it("device sign-up creates an account and a usable cookie; sign-out clears it", async () => {
+    const res = await deviceRoute(json(null, "/api/auth/device", {}));
+    expect(res.status).toBe(200);
+    const cookie = res.headers.get("set-cookie")!.split(";")[0];
+    const body = await res.json();
+    expect(body).toMatchObject({ accountKind: "device", activeCase: "own", planChosen: false, lettersUsed: 0, freeLetters: 3 });
+    expect((await meRoute(json(cookie, "/api/me", undefined, "GET"))).status).toBe(200);
+    expect((await signoutRoute()).headers.get("set-cookie")).toMatch(/settla_uid=;.*Max-Age=0/);
+  });
+
+  it("switching to the sample case keeps the account and maps requests to sample-arjun", async () => {
+    const { id, cookie } = await newAccount();
+    let me = await (await sessionRoute(json(cookie, "/api/session", { sample: true }))).json();
+    expect(me).toMatchObject({ accountId: id, activeCase: "sample" });
+    const s = await requireUserState(json(cookie, "/api/me", undefined, "GET"));
+    expect(s.userId).toBe(SAMPLE_USER_ID);
+    expect(s.accountId).toBe(id);
+    me = await (await meRoute(json(cookie, "/api/me", undefined, "GET"))).json();
+    expect(me.accountId).toBe(id);
+    me = await (await sessionRoute(json(cookie, "/api/session", { sample: false }))).json();
+    expect(me.activeCase).toBe("own");
+    expect((await requireUserState(json(cookie, "/api/me", undefined, "GET"))).userId).toBe(id);
+  });
+});
+
+describe("plan choice and payments", () => {
+  it("choosing free sets plan_chosen once", async () => {
+    const { cookie } = await newAccount();
+    expect((await planRoute(json(cookie, "/api/me/plan", { choice: "plus" }))).status).toBe(400);
+    const res = await planRoute(json(cookie, "/api/me/plan", { choice: "free" }));
+    expect((await res.json()).planChosen).toBe(true);
+    expect((await (await meRoute(json(cookie, "/api/me", undefined, "GET"))).json()).planChosen).toBe(true);
+  });
+
+  it("checkout attaches to the account (never sample-arjun) and marks the plan chosen", async () => {
+    const { id, cookie } = await newAccount();
+    await sessionRoute(json(cookie, "/api/session", { sample: true }));
+    const env = getEnv();
+    env.DODO_PAYMENTS_API_KEY = "k";
+    env.DODO_PRODUCT_CASE_PASS = "pdt_plus";
+    const sent: { metadata?: { userId?: string } }[] = [];
+    vi.stubGlobal("fetch", async (_u: string, init: RequestInit) => {
+      sent.push(JSON.parse(String(init.body)));
+      return Response.json({ checkout_url: "https://pay.example/c" });
+    });
+    try {
+      const res = await checkoutRoute(json(cookie, "/api/checkout", { product: "case_pass" }));
+      expect(await res.json()).toEqual({ checkoutUrl: "https://pay.example/c" });
+      expect(sent[0].metadata?.userId).toBe(id);
+      expect((await checkoutRoute(json(cookie, "/api/checkout", { product: "credits_10" }))).status).toBe(400);
+    } finally {
+      vi.unstubAllGlobals();
+      env.DODO_PAYMENTS_API_KEY = "";
+      env.DODO_PRODUCT_CASE_PASS = "";
+    }
+    const row = await env.DB.prepare("SELECT plan_chosen FROM users WHERE id = ?").bind(id).first<{ plan_chosen: number }>();
+    expect(row!.plan_chosen).toBe(1);
+  });
+});
+
+describe("free tier: three letters", () => {
+  const read = (cookie: string) => readRoute(json(cookie, "/api/letters/read", { pages: [png], language: "en" }));
+
+  it("allows three readable reads, then 402 payment_required; unreadable reads are free", async () => {
+    const { cookie } = await newAccount();
+    letterResult.readable = false;
+    for (let i = 0; i < 5; i++) expect((await read(cookie)).status).toBe(200);
+    letterResult.readable = true;
+    for (let i = 0; i < 3; i++) expect((await read(cookie)).status).toBe(200);
+    const blocked = await read(cookie);
+    expect(blocked.status).toBe(402);
+    expect((await blocked.json()).code).toBe("payment_required");
+    const me = await (await meRoute(json(cookie, "/api/me", undefined, "GET"))).json();
+    expect(me.lettersUsed).toBe(3);
+  });
+
+  it("Plus and judge plans are unlimited", async () => {
+    const env = getEnv();
+    for (const kind of ["case_pass", "judge"]) {
+      const { id, cookie } = await newAccount();
+      await env.DB.prepare("UPDATE users SET plan_kind = ?, plan_expires_at = ?, letters_used = 3 WHERE id = ?").bind(kind, Date.now() + 1e9, id).run();
+      for (let i = 0; i < 5; i++) expect((await read(cookie)).status).toBe(200);
+    }
+  });
+
+  it("existing credits still pay after the free letters; the sample case is exempt", async () => {
+    const env = getEnv();
+    const { id, cookie } = await newAccount();
+    await env.DB.prepare("UPDATE users SET letters_used = 3, credits = 1 WHERE id = ?").bind(id).run();
+    expect((await read(cookie)).status).toBe(200);
+    expect((await read(cookie)).status).toBe(402);
+    await sessionRoute(json(cookie, "/api/session", { sample: true }));
+    for (let i = 0; i < 5; i++) expect((await read(cookie)).status).toBe(200);
+  });
+});

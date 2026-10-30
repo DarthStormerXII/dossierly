@@ -1,14 +1,14 @@
-/* Dossierly tokens. Violet = the official's side (Polish office stamp ink), amber = the user, red = deadlines only. */
+/* Dossierly tokens. Monochrome base (#212529 / #f5f6f7 / white); violet = the official's side, amber = the user, red = deadlines only. */
 :root {
-  --bg: #f2f3f5;
+  --bg: #f5f6f7;
   --surface: #ffffff;
-  --surface-2: #e9ebef;
-  --ink: #111418;
-  --ink-2: #48505b;
-  --ink-3: #6b7380;
-  --line: #d6dae1;
-  --line-strong: #b9bfc9;
-  --brand: #1b2a48;
+  --surface-2: #eceef0;
+  --ink: #212529;
+  --ink-2: #4f565e;
+  --ink-3: #737a82;
+  --line: #e3e6e9;
+  --line-strong: #c9ced3;
+  --brand: #212529;
   --brand-ink: #ffffff;
   --official: #5a3db0;
   --official-soft: #efeafc;
@@ -22,9 +22,12 @@
   --ok: #1d7752;
   --ok-soft: #e2f3ea;
   --focus: #2f6fed;
-  --shadow: 0 1px 2px rgb(17 20 24 / 6%), 0 4px 16px rgb(17 20 24 / 5%);
-  --radius: 14px;
-  --radius-sm: 9px;
+  --shadow: 0 1px 2px rgb(33 37 41 / 4%), 0 12px 32px rgb(33 37 41 / 7%);
+  --shadow-lg: 0 2px 6px rgb(33 37 41 / 5%), 0 30px 60px rgb(33 37 41 / 12%);
+  --radius-lg: 30px;
+  --radius: 20px;
+  --radius-sm: 12px;
+  --pill: 999px;
   --font: var(--font-text), system-ui, -apple-system, "Segoe UI", "Noto Sans", "Noto Sans Devanagari", "Noto Sans Tamil", sans-serif;
   --mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
   color-scheme: light;
@@ -32,22 +35,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0d0f13; --surface: #161a20; --surface-2: #1f242c; --ink: #eceef2; --ink-2: #aab1bd; --ink-3: #8a93a1;
-    --line: #2a3039; --line-strong: #3b434f; --brand: #d8e0f2; --brand-ink: #0d0f13;
+    --bg: #111315; --surface: #1a1d20; --surface-2: #24282c; --ink: #f1f3f5; --ink-2: #b4bac0; --ink-3: #8d949b;
+    --line: #2c3035; --line-strong: #3d4248; --brand: #f5f6f7; --brand-ink: #212529;
     --official: #b9a8ff; --official-soft: #221b3b; --official-line: #4a3c86;
     --user: #f6b955; --user-fill: #f6b955; --user-soft: #2e230f; --user-line: #6b4f1d;
     --deadline: #ff6f6f; --deadline-soft: #3a1618; --ok: #62d3a0; --ok-soft: #12281e; --focus: #7aa7ff;
-    --shadow: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%); --shadow-lg: 0 24px 60px rgb(0 0 0 / 45%);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0d0f13; --surface: #161a20; --surface-2: #1f242c; --ink: #eceef2; --ink-2: #aab1bd; --ink-3: #8a93a1;
-  --line: #2a3039; --line-strong: #3b434f; --brand: #d8e0f2; --brand-ink: #0d0f13;
+  --bg: #111315; --surface: #1a1d20; --surface-2: #24282c; --ink: #f1f3f5; --ink-2: #b4bac0; --ink-3: #8d949b;
+  --line: #2c3035; --line-strong: #3d4248; --brand: #f5f6f7; --brand-ink: #212529;
   --official: #b9a8ff; --official-soft: #221b3b; --official-line: #4a3c86;
   --user: #f6b955; --user-fill: #f6b955; --user-soft: #2e230f; --user-line: #6b4f1d;
   --deadline: #ff6f6f; --deadline-soft: #3a1618; --ok: #62d3a0; --ok-soft: #12281e; --focus: #7aa7ff;
-  --shadow: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%); --shadow-lg: 0 24px 60px rgb(0 0 0 / 45%);
   color-scheme: dark;
 }
 
@@ -55,12 +58,12 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
-  font-size: 17px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  font-size: 17px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; letter-spacing: -0.005em;
 }
-h1, h2, h3, h4 { line-height: 1.18; margin: 0 0 0.4em; letter-spacing: -0.01em; text-wrap: balance; }
-h1 { font-size: clamp(1.75rem, 1.2rem + 2.6vw, 2.9rem); font-weight: 750; }
-h2 { font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.75rem); font-weight: 700; }
-h3 { font-size: 1.1rem; font-weight: 700; }
+h1, h2, h3, h4 { line-height: 1.1; margin: 0 0 0.4em; letter-spacing: -0.025em; text-wrap: balance; font-weight: 600; }
+h1 { font-size: clamp(2rem, 1.3rem + 3vw, 3.4rem); }
+h2 { font-size: clamp(1.45rem, 1.1rem + 1.4vw, 2.1rem); }
+h3 { font-size: 1.12rem; letter-spacing: -0.015em; }
 p { margin: 0 0 0.8em; text-wrap: pretty; }
 a { color: inherit; text-underline-offset: 3px; }
 img, svg { display: block; max-width: 100%; }
@@ -79,9 +82,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* Buttons */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px;
-  border-radius: 12px; border: 1.5px solid var(--line-strong); background: var(--surface); color: var(--ink);
-  font-weight: 650; text-decoration: none; cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 24px;
+  border-radius: var(--pill); border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+  font-weight: 550; text-decoration: none; cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.1s;
 }
 .btn:hover { border-color: var(--ink-3); }
 .btn:active { transform: translateY(1px); }
@@ -90,7 +93,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn-primary:hover { border-color: var(--brand); filter: brightness(1.12); }
 .btn-ghost { border-color: transparent; background: transparent; padding: 0 12px; }
 .btn-ghost:hover { background: var(--surface-2); border-color: transparent; }
-.btn-small { min-height: 38px; padding: 0 14px; font-size: 0.9rem; border-radius: 10px; }
+.btn-small { min-height: 40px; padding: 0 18px; font-size: 0.92rem; }
 .btn-block { width: 100%; }
 .btn-danger { color: var(--deadline); border-color: var(--deadline); }
 
@@ -98,7 +101,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .field { display: grid; gap: 6px; }
 .field > span, .label { font-weight: 650; font-size: 0.95rem; }
 .input, select.input, textarea.input {
-  width: 100%; min-height: 48px; padding: 10px 14px; border-radius: 11px; border: 1.5px solid var(--line-strong);
+  width: 100%; min-height: 50px; padding: 10px 18px; border-radius: 16px; border: 1px solid var(--line-strong);
   background: var(--surface); color: var(--ink);
 }
 textarea.input { min-height: 96px; resize: vertical; line-height: 1.45; }
@@ -108,21 +111,20 @@ textarea.input { min-height: 96px; resize: vertical; line-height: 1.45; }
 .seg { display: flex; flex-wrap: wrap; gap: 8px; }
 .seg label { position: relative; }
 .seg input { position: absolute; opacity: 0; inset: 0; }
-.seg span { display: inline-flex; min-height: 44px; align-items: center; padding: 0 14px; border-radius: 10px; border: 1.5px solid var(--line-strong); cursor: pointer; }
+.seg span { display: inline-flex; min-height: 44px; align-items: center; padding: 0 18px; border-radius: var(--pill); border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 500; }
 .seg input:checked + span { border-color: var(--brand); background: var(--brand); color: var(--brand-ink); }
 .seg input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
 
 /* Cards and labels */
-.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
 .card-flat { box-shadow: none; }
 .card h3 { margin-bottom: 6px; }
 .tab-label {
-  display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 0.72rem; font-weight: 600;
-  letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2);
+  display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 500; color: var(--ink-3);
 }
 .chip {
   display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 2px 10px; border-radius: 999px;
-  font-size: 0.82rem; font-weight: 600; border: 1px solid var(--line-strong); background: var(--surface); white-space: nowrap;
+  font-size: 0.82rem; font-weight: 500; border: 1px solid var(--line); background: var(--surface); white-space: nowrap;
 }
 .chip-ai { border-color: var(--brand); color: var(--brand); font-family: var(--mono); letter-spacing: 0.04em; }
 .chip-ok { background: var(--ok-soft); border-color: transparent; color: var(--ok); }

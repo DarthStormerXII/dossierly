@@ -32,7 +32,7 @@ export function LettersFlow() {
     setBusy(null);
     void refreshMe();
     if (!r.ok) {
-      if (needsPlan(r)) return router.push("/pricing?reason=letters");
+      if (needsPlan(r)) return router.push("/app/plan?reason=letters");
       return setErr({ f: r, retry: () => void doRead(imgs) });
     }
     setRead(r.data);
@@ -46,7 +46,7 @@ export function LettersFlow() {
     const r = await api.linkLetter(d.case, read.letter, delivery);
     setBusy(null);
     if (!r.ok) {
-      if (needsPlan(r)) return router.push("/pricing?reason=letters");
+      if (needsPlan(r)) return router.push("/app/plan?reason=letters");
       return setErr({ f: r, retry: () => void doLink() });
     }
     setLink(r.data);
