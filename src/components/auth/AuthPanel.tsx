@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { accountState, safeNext } from "@/lib/client/account";
 import { deviceSignUp, friendlyError, passkeySignIn, passkeySignUp, passkeySupported } from "@/lib/client/api";
 import { Icon } from "../Icon";
+import { Logo } from "../Logo";
 
 type Mode = "signup" | "signin";
 
@@ -17,8 +19,12 @@ export function AuthPanel({ mode }: { mode: Mode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => { void Promise.resolve(passkeySupported()).then(setCanPasskey); }, []);
+  // Already signed in: skip the form.
+  useEffect(() => { void accountState().then((s) => s === "signed-in" && next()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const next = () => {
+    const back = params.get("next");
+    if (back) return router.replace(safeNext(back));
     const start = params.get("start");
     const plan = params.get("plan");
     const q = new URLSearchParams();
@@ -39,10 +45,16 @@ export function AuthPanel({ mode }: { mode: Mode }) {
   };
 
   const signup = mode === "signup";
+  const qs = params.toString() ? `?${params.toString()}` : "";
   return (
     <div className="auth">
+      <div className="auth-side">
+        <div className="auth-top">
+          <Link href="/" className="logo-link" aria-label="Dossierly home"><Logo size={24} /></Link>
+          <Link href="/" className="auth-back"><span aria-hidden="true">←</span> Back to site</Link>
+        </div>
       <div className="auth-card">
-        <div className="auth-icon"><Icon name="lock" size={26} /></div>
+        <div className="auth-icon"><Icon name="lock" size={22} /></div>
         <h1>{signup ? "Create your account" : "Welcome back"}</h1>
         <p className="muted" style={{ margin: 0 }}>
           {signup ? "One tap with a passkey: your face, fingerprint or screen lock. No email, no password." : "Sign in with the passkey you made for Dossierly."}
@@ -70,12 +82,21 @@ export function AuthPanel({ mode }: { mode: Mode }) {
         )}
         {error && <div className="error-box small" role="alert">{error}</div>}
         <p className="auth-foot">
-          {signup ? <>Already have an account? <Link href="/signin">Sign in</Link></> : <>New to Dossierly? <Link href="/signup">Create an account</Link></>}
+          {signup ? <>Already have an account? <Link href={`/signin${qs}`}>Sign in</Link></> : <>New to Dossierly? <Link href={`/signup${qs}`}>Create an account</Link></>}
         </p>
         <p className="tiny muted" style={{ margin: 0, textAlign: "center" }}>
           By continuing you accept the <Link href="/legal/terms">terms</Link> and <Link href="/legal/privacy">privacy notice</Link>.
         </p>
       </div>
+      </div>
+      <aside className="auth-visual" aria-hidden="true">
+        <div className="auth-visual-img" />
+        <div className="auth-quote">
+          <div className="auth-bubble official"><small>Official · Polish</small>„Brakuje potwierdzenia ubezpieczenia zdrowotnego.”</div>
+          <div className="auth-bubble you"><small>For you · English</small>Proof of health insurance is missing.</div>
+          <p>Your own private agent prepares you, interprets at the counter and counts every deadline.</p>
+        </div>
+      </aside>
     </div>
   );
 }

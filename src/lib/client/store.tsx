@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { signInUrl } from "./account";
 import { api, ensureSession, startSession } from "./api";
 import { emptyCase, sampleCase } from "./sample";
 import type { Case, Language, Me, Run, Status } from "./types";
@@ -70,7 +71,11 @@ export function CaseProvider({ children }: { children: React.ReactNode }) {
     // Async initial load from the encrypted vault; state is set after the awaits resolve.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
-    void ensureSession().then((r) => r.ok && setMe(r.data));
+    void ensureSession().then((r) => {
+      if (r.ok) return setMe(r.data);
+      // Expired or invalid session: back to sign-in, then return here.
+      if (r.status === 401) window.location.replace(signInUrl());
+    });
     void api.status().then((r) => r.ok && setStatus(r.data));
     const t = setInterval(() => void api.status().then((r) => r.ok && setStatus(r.data)), 30_000);
     return () => clearInterval(t);

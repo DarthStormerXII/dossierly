@@ -12,6 +12,15 @@ const PARTS: { icon: IconName; name: string; desc: string }[] = [
   { icon: "lock", name: "Dodo Payments", desc: "Checkout with BLIK, Przelewy24 and cards" },
 ];
 
+const LOGOS: { file: string; name: string; role: string; h: number }[] = [
+  { file: "nebius", name: "Nebius", role: "Token Factory · Nemotron inference", h: 26 },
+  { file: "nvidia", name: "NVIDIA", role: "Nemotron · NemoClaw · OpenShell · Guardrails", h: 22 },
+  { file: "tavily", name: "Tavily", role: "Official pages, read and watched", h: 22 },
+  { file: "langchain", name: "LangChain", role: "Deep Agents inside each sandbox", h: 20 },
+  { file: "dodo", name: "Dodo Payments", role: "Checkout and merchant of record", h: 24 },
+  { file: "cloudflare", name: "Cloudflare", role: "App hosting in the EU", h: 24 },
+];
+
 /** "And it's all one system": every part, what it does in the product. */
 export function BuiltOn() {
   return (
@@ -24,6 +33,15 @@ export function BuiltOn() {
             stitched-together apps.
           </p>
         </header>
+        <ul className="lp-logos" aria-label="Built with">
+          {LOGOS.map((l) => (
+            <li key={l.file}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/logos/${l.file}.svg`} alt={l.name} style={{ height: l.h }} />
+              <span>{l.role}</span>
+            </li>
+          ))}
+        </ul>
         <ul className="lp-parts">
           {PARTS.map((p) => (
             <li key={p.name}>

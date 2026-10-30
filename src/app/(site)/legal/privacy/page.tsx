@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
         <thead><tr><th>Data</th><th>Where</th><th>How</th></tr></thead>
         <tbody>
           <tr><td>Your case (profile, events, documents, deadlines, wrap-ups, letter explanations)</td><td>Your device only (IndexedDB)</td><td>Encrypted with AES-GCM; key from your passkey, or a non-exportable device key</td></tr>
-          <tr><td>A pseudonymous account id, plan and credits</td><td>Cloudflare D1, EU</td><td>No name or email unless you pay</td></tr>
+          <tr><td>A pseudonymous account id, your passkey's public key, and your plan</td><td>Cloudflare D1, EU</td><td>No name or email unless you pay</td></tr>
           <tr><td>Ledger and run logs (model, time, bytes, masked count, cost)</td><td>Cloudflare D1, EU</td><td>Hash-chained; no conversation text</td></tr>
           <tr><td>Deadline reminders</td><td>Cloudflare, EU</td><td>Only a date and a short label</td></tr>
           <tr><td>Letter images</td><td>Sent to the model to be read; not kept by us</td><td>If saving is offered later, encrypted on your device before upload</td></tr>

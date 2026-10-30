@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeaderActions } from "./HeaderActions";
 import { Logo } from "./Logo";
 
 export function SiteHeader() {
@@ -12,11 +13,7 @@ export function SiteHeader() {
           <Link href="/countries">Countries</Link>
           <Link href="/pricing" className="nav-pricing">Pricing</Link>
         </nav>
-        <div className="site-actions">
-          <Link href="/pricing" className="nav-pricing-sm">Pricing</Link>
-          <Link href="/signin" className="btn btn-ghost btn-small nav-signin">Sign in</Link>
-          <Link href="/signup" className="btn btn-primary btn-small">Get started</Link>
-        </div>
+        <HeaderActions />
       </div>
     </header>
   );

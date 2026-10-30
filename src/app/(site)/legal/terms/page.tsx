@@ -35,8 +35,8 @@ export default function TermsPage() {
 
       <h2>Payments</h2>
       <p>
-        Paid plans are sold by our merchant of record, Dodo Payments, which handles payment, invoices and VAT. Prices are shown in PLN.
-        A Case Pass covers one residence case for 18 months. Credits do not expire.
+        Dossierly Plus is sold by our merchant of record, Dodo Payments, which handles payment, invoices and VAT. Prices are shown in US dollars; checkout shows your local currency.
+        Dossierly Plus is a one-time payment that covers one residence case for 18 months and does not renew. The free plan includes three letters, appointment preparation and live interpreting.
       </p>
       <p>
         Withdrawal: as a consumer you normally have 14 days to withdraw from a digital service. Before checkout you are asked to confirm that you want access immediately and that you lose this right once the service starts. If something went wrong, write to us and we will look at it.
