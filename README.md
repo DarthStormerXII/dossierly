@@ -69,7 +69,7 @@ Token Factory features in use: structured JSON output with zod validation and on
 ## Architecture
 
 ```
-Phone (Next.js) ──HTTPS──> Cloudflare Pages ──> Worker: API routes, D1 (EU), KV, R2 (EU), Durable Objects, Workflows, cron
+Phone (Next.js) ──HTTPS──> Cloudflare Pages ──> Worker: API routes, D1 (EU), KV, Durable Objects, nightly-watch Workflow, cron
                                                    │  model calls ──> Nebius Token Factory (Nemotron Lightning, Super VL, Ultra)
                                                    │  public pages ──> Tavily, NVIDIA Nemotron embeddings
                                                    └─ task queue <── bridge (outbound only) ── NemoClaw / OpenShell sandbox per person
