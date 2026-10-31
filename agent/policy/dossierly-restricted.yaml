@@ -20,6 +20,8 @@ network_policies:
         rules:
           - allow: { method: GET, path: "/**" }
           - allow: { method: HEAD, path: "/**" }
+          # The metering proxy: every model call from the sandbox goes through the Worker's daily cap.
+          - allow: { method: POST, path: "/api/tf/*/*/v1/chat/completions" }
       - host: gov.pl
         port: 443
         protocol: rest

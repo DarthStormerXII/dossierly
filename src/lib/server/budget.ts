@@ -3,7 +3,7 @@ import { dayKey } from "./util";
 
 export type BudgetKind = "tf_usd" | "tavily_credits";
 const MICRO = 1_000_000;
-export const GLOBAL_CAPS: Record<BudgetKind, number> = { tf_usd: 2, tavily_credits: 10 };
+export const GLOBAL_CAPS: Record<BudgetKind, number> = { tf_usd: 0.25, tavily_credits: 10 };
 const USER_CAPS: Partial<Record<BudgetKind, number>> = { tavily_credits: 1 };
 
 async function spend(env: Env, scope: string, kind: BudgetKind, micro: number, capMicro: number): Promise<boolean> {
@@ -42,6 +42,17 @@ export async function checkAndSpend(
       .bind(micro, dayKey(), userScope, kind).run();
   }
   return false;
+}
+
+/**
+ * Adjusts today's global row by (actual - reserved), which may be negative. Used after a reserved call
+ * finishes: the reservation becomes the real cost, or is released entirely when actual is 0. Never goes below 0.
+ */
+export async function settleSpend(env: Env, kind: BudgetKind, reservedUsd: number, actualUsd: number): Promise<void> {
+  const delta = Math.round(actualUsd * MICRO) - Math.round(reservedUsd * MICRO);
+  if (!Number.isFinite(delta) || delta === 0) return;
+  await env.DB.prepare("UPDATE budgets SET spent_micro = MAX(0, spent_micro + ?) WHERE day = ? AND scope = 'global' AND kind = ?")
+    .bind(delta, dayKey(), kind).run();
 }
 
 export async function getBudgets(env: Env) {

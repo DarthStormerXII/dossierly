@@ -81,7 +81,7 @@ Never invent facts, documents or dates. Write "______" where information is miss
     data = out.data;
     runs = [out.run];
   } catch (err) {
-    if (err instanceof ModelError && err.code === "no_key") throw err;
+    if (err instanceof ModelError && ["no_key", "over_budget", "models_disabled"].includes(err.code)) throw err;
     // Ultra unavailable or invalid twice: Super VL reasons over the same masked case and the run says so.
     const out = await runModel(ctx, { ...base, task: "link_fallback", system, maxTokens: 2500 });
     data = out.data;

@@ -51,3 +51,22 @@ export function sumRuns(runs: Run[]): Run {
     ranOn: runs.every((r) => r.ranOn === "replay") ? "replay" : runs.find((r) => r.ranOn !== "replay")?.ranOn ?? "cloud",
   };
 }
+
+/** Tokens one image page is assumed to cost when reserving budget (pixels cannot be counted before the call). */
+export const IMAGE_TOKENS_ESTIMATE = 3000;
+
+/**
+ * Conservative input-token estimate for any chat payload: JSON characters / 3 (more than the usual 4),
+ * with image data URLs dropped from the count and charged at a flat per-image estimate.
+ */
+export function estimateInputTokens(payload: unknown): number {
+  let images = 0;
+  const json = JSON.stringify(payload, (k, v) => {
+    if (k === "image_url") {
+      images++;
+      return null;
+    }
+    return v;
+  });
+  return Math.ceil((json?.length ?? 0) / 3) + images * IMAGE_TOKENS_ESTIMATE;
+}

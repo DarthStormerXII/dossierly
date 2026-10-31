@@ -25,6 +25,8 @@ export function loadConfig(env = process.env) {
   const pool = Number(f.POOL_SIZE ?? 4);
   return {
     url: (f.BRIDGE_URL ?? "https://dossierly.pages.dev").replace(/\/$/, ""),
+    appUrl: (f.APP_URL ?? f.BRIDGE_URL ?? "https://dossierly.pages.dev").replace(/\/$/, ""),
+    tfProxy: f.TF_PROXY !== "0",
     secret: f.BRIDGE_SECRET ?? "",
     mask: f.SETTLA_MASK ?? "",
     pollMs: Number(f.POLL_MS ?? 2000),

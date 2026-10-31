@@ -8,6 +8,7 @@ import { ResultSchemas } from "../../src/lib/agent/schemas.ts";
 import { addTimelineLine, extractJson } from "./json.mjs";
 import { memoryHash, readMemory, runDcode, stageFiles } from "./sandbox.mjs";
 import { nemo } from "./shell.mjs";
+import { pointSandboxAtProxy } from "./tfproxy.mjs";
 
 const FINISH_PROMPT =
   "You have read the files. Now produce the final answer for this task: write ONE JSON object in the exact shape the task asked for to /sandbox/task/answer.json, then reply with the same JSON object and nothing else.";
@@ -46,6 +47,11 @@ export async function runTask(task, { cfg, pool, mask }, log) {
     if (skill) files["skill.md"] = skill;
     await stageFiles(sandbox, files, renderCaseMemory(masked.input.case ?? task.input.case));
     mark("uploaded your case and the official sources", t, "nemo-deepagents upload");
+
+    // Every Token Factory call from the sandbox must go through the Worker's daily-cap meter.
+    t = Date.now();
+    const pointed = await pointSandboxAtProxy(sandbox, cfg);
+    if (pointed !== "disabled") mark(`model calls go through the metered proxy`, t, "tf-proxy");
 
     const language = task.input.language ?? "en";
     const before = task.kind === "file" ? await memoryHash(sandbox) : "";

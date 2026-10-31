@@ -1,9 +1,9 @@
 import { MODEL_IDS } from "../config";
 import { costUsd, makeRun } from "../model/cost";
 import { extractJson } from "../model/json";
+import { assertModelsEnabled, meterClient } from "../model/meter";
 import { createTokenFactoryClient } from "../model/tokenfactory";
 import type { ChatClient } from "../model/types";
-import { checkAndSpend } from "../server/budget";
 import type { Env } from "../server/env";
 import { recordLedger } from "../server/ledger";
 import { recordRun, type Run } from "../server/runs";
@@ -16,8 +16,6 @@ import {
   AskResultSchema, FileInputSchema, InputSchemas, PrepareResultSchema, ResultSchemas,
   type AskInput, type PrepareInput, type TraceStep,
 } from "./schemas";
-
-const RESERVE_USD = 0.01;
 
 /** Same files the sandbox agent reads, rendered inline for a plain model call. */
 export function buildCloudMessages(row: Pick<TaskRow, "kind" | "input">) {
@@ -77,8 +75,9 @@ export async function runCloudTask(
       return;
     }
     const { messages, input } = buildCloudMessages(row);
-    if (!(await checkAndSpend(env, "tf_usd", RESERVE_USD))) return void (await fail("The daily model budget is used up"));
-    const client = opts.client ?? createTokenFactoryClient(env.NEBIUS_API_KEY);
+    // Metered per call: over the daily cap (or with models switched off) the task fails with that message; it never spends.
+    assertModelsEnabled(env);
+    const client = meterClient(env, opts.client ?? createTokenFactoryClient(env.NEBIUS_API_KEY));
     let usage = { tokensIn: 0, tokensOut: 0, cachedTokens: 0 };
     let lastError = "";
     let lastRaw = "";

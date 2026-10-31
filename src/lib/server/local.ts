@@ -138,6 +138,7 @@ export function localEnv(): Env {
     DODO_PRODUCT_FAMILY: e.DODO_PRODUCT_FAMILY ?? "",
     APP_URL: e.APP_URL ?? "http://localhost:3000",
     APP_ENV: "local",
+    MODELS_DISABLED: e.MODELS_DISABLED ?? "",
   };
   return g.__settlaLocalEnv;
 }

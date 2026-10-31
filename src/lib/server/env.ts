@@ -58,6 +58,8 @@ export type Env = {
   DODO_PRODUCT_FAMILY: string;
   APP_URL: string;
   APP_ENV: "local" | "preview" | "production";
+  /** "1" switches every Token Factory call off (set as a secret or var; see docs/BUILD.md). */
+  MODELS_DISABLED?: string;
 };
 
 const STRING_KEYS = [

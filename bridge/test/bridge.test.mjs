@@ -94,3 +94,42 @@ test("extractJson tolerates reasoning blocks and fences; addTimelineLine keeps o
   const md = "# Case\n\n**Timeline:**\n- 18 Sep: fingerprints\n\n**Deadline:** none\n";
   assert.match(addTimelineLine(md, "- 5 Nov: wrap-up"), /- 18 Sep: fingerprints\n- 5 Nov: wrap-up\n\n\*\*Deadline/);
 });
+
+test("tf proxy: URL carries the HMAC signature the Worker checks, and the sandbox config rewrite is safe and idempotent", async () => {
+  const { createHmac } = await import("node:crypto");
+  const { proxyBaseUrl, proxySig, pointSandboxAtProxy, rewriteScript } = await import("../src/tfproxy.mjs");
+  const cfg = { appUrl: "https://dossierly.pages.dev/", url: "https://other.example", secret: "s3cret" };
+  const sig = createHmac("sha256", "s3cret").update("tf-proxy:settla-pool-01").digest("hex");
+  assert.equal(proxySig("s3cret", "settla-pool-01"), sig);
+  assert.equal(proxyBaseUrl(cfg, "settla-pool-01"), `https://dossierly.pages.dev/api/tf/settla-pool-01/${sig}/v1`);
+  assert.equal(proxyBaseUrl({ url: "https://dossierly.pages.dev", secret: "s3cret" }, "a"), `https://dossierly.pages.dev/api/tf/a/${proxySig("s3cret", "a")}/v1`);
+  assert.throws(() => rewriteScript("https://x.test/v1'; rm -rf /"), /unsafe/);
+
+  const calls = [];
+  const fake = (code, stdout) => async (args) => { calls.push(args); return { code, stdout, stderr: "" }; };
+  assert.equal(await pointSandboxAtProxy("settla-pool-01", cfg, fake(0, "changed\n")), "changed");
+  assert.equal(await pointSandboxAtProxy("settla-pool-01", cfg, fake(0, "same\n")), "same");
+  assert.deepEqual(calls[0].slice(0, 6), ["settla-pool-01", "exec", "--no-tty", "--timeout", "20", "--"]);
+  assert.match(calls[0].at(-1), /\/sandbox\/\.deepagents\/config\.toml/);
+  assert.match(calls[0].at(-1), new RegExp(sig));
+  await assert.rejects(pointSandboxAtProxy("settla-pool-01", cfg, fake(4, "")), /no base_url/);
+  await assert.rejects(pointSandboxAtProxy("settla-pool-01", cfg, fake(1, "")), /metering proxy/);
+  await assert.rejects(pointSandboxAtProxy("bad name; x", cfg, fake(0, "same")), /unsafe sandbox/);
+  assert.equal(await pointSandboxAtProxy("settla-pool-01", { ...cfg, tfProxy: false }, fake(1, "")), "disabled");
+});
+
+test("tf proxy rewrite script really edits a TOML file in place and a second run is a no-op", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const { mkdtempSync, writeFileSync, readFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const { rewriteScript } = await import("../src/tfproxy.mjs");
+  const dir = mkdtempSync(join(tmpdir(), "tfp-"));
+  const file = join(dir, "config.toml");
+  writeFileSync(file, '[models.providers.custom]\nbase_url = "https://api.tokenfactory.nebius.com/v1"\napi_key_env = "NEBIUS_API_KEY"\n');
+  const url = "https://dossierly.pages.dev/api/tf/box/abc123/v1";
+  const script = rewriteScript(url).replace("/sandbox/.deepagents/config.toml", file);
+  assert.equal(execFileSync("sh", ["-c", script]).toString().trim(), "changed");
+  assert.equal(readFileSync(file, "utf8"), `[models.providers.custom]\nbase_url = "${url}"\napi_key_env = "NEBIUS_API_KEY"\n`);
+  assert.equal(execFileSync("sh", ["-c", script]).toString().trim(), "same");
+});

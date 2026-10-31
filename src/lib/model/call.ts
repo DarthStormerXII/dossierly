@@ -1,12 +1,12 @@
 import type { ZodType } from "zod";
-import { FALLBACK_MODEL, MODEL_TABLE, MODEL_IDS, PRICES, type ModelTask } from "../config";
+import { FALLBACK_MODEL, MODEL_TABLE, MODEL_IDS, type ModelTask } from "../config";
 import type { Masker } from "../mask";
 import type { Env } from "../server/env";
-import { checkAndSpend } from "../server/budget";
 import { recordLedger } from "../server/ledger";
 import { recordRun, type Run } from "../server/runs";
 import { makeRun } from "./cost";
 import { callJson } from "./json";
+import { assertModelsEnabled, meterClient } from "./meter";
 import { createTokenFactoryClient } from "./tokenfactory";
 import type { ChatClient, ChatMessage, ContentPart, TokenLogprob } from "./types";
 import { ModelError } from "./types";
@@ -34,7 +34,7 @@ export interface ModelCall<T> {
   flex?: boolean;
   logprobs?: boolean;
   masker: Masker;
-  /** Recorded stand-in, served as ranOn "replay" when over the daily cap or in fixture mode. */
+  /** Recorded stand-in, served as ranOn "replay" only for local fixture mode (APP_ENV local, no key). Never in production. */
   replay: () => T;
   json?: "json_object" | Record<string, unknown>;
 }
@@ -45,15 +45,6 @@ export interface ModelOut<T> {
   masked: number;
   raw: string;
   logprobs?: TokenLogprob[];
-}
-
-const estTokens = (s: string) => Math.ceil(s.length / 3);
-
-/** Upper-bound cost estimate used to reserve budget before the call. */
-export function estimateCostUsd(task: ModelTask, textChars: number, images: number, maxTokens: number): number {
-  const p = PRICES[MODEL_TABLE[task]];
-  const tin = estTokens("x".repeat(textChars)) + images * 1500;
-  return (tin * p.in + maxTokens * 0.6 * p.out) / 1_000_000;
 }
 
 function buildMessages(call: { system: string; context?: string; input: string; images?: string[] }): ChatMessage[] {
@@ -76,9 +67,11 @@ async function safely(p: Promise<unknown>): Promise<void> {
   }
 }
 
-const fixtureMode = () => process.env.DEMO_FIXTURES === "1";
+/** Recorded answers exist for local development and tests only; a deployed Worker never serves them. */
+const fixtureMode = (env: Env) => env.APP_ENV === "local" && process.env.DEMO_FIXTURES === "1";
 
 export async function runModel<T>(ctx: Ctx, call: ModelCall<T>): Promise<ModelOut<T>> {
+  assertModelsEnabled(ctx.env);
   const model = MODEL_IDS[MODEL_TABLE[call.task]];
   const context = call.context ? call.masker.mask(call.context) : undefined;
   const input = call.masker.mask(call.input);
@@ -95,15 +88,13 @@ export async function runModel<T>(ctx: Ctx, call: ModelCall<T>): Promise<ModelOu
 
   const key = ctx.env.NEBIUS_API_KEY;
   if (!ctx.client && !key) {
-    if (fixtureMode()) return replay();
+    if (fixtureMode(ctx.env)) return replay();
     throw new ModelError("The model service is not configured", "no_key", 503);
   }
 
-  const reserve = estimateCostUsd(call.task, (context?.length ?? 0) + input.length + call.system.length, call.images?.length ?? 0, call.maxTokens);
-  const allowed = await checkAndSpend(ctx.env, "tf_usd", reserve, { userId: ctx.userId ?? undefined });
-  if (!allowed) return replay();
-
-  const client = ctx.client ?? createTokenFactoryClient(key);
+  // Each call to the model (the corrective JSON retry and the 404 fallback model included) reserves its
+  // own upper bound against the $-per-day cap and settles to actual usage; over the cap it throws over_budget.
+  const client = meterClient(ctx.env, ctx.client ?? createTokenFactoryClient(key));
   const t0 = Date.now();
   const ask = (m: string) =>
     callJson(

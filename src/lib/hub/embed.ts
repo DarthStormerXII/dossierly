@@ -4,10 +4,8 @@
  * lexical overlap score keeps retrieval working. Vectors are cached in KV per provider+text hash.
  */
 import { EMBEDDING_MODEL, NVIDIA_BASE_URL, NVIDIA_EMBEDDING_MODEL } from "../config";
-import { embeddingCostUsd } from "../model/cost";
-import { embedTokenFactory } from "../model/tokenfactory";
+import { meteredEmbed } from "../model/meter";
 import type { Env } from "../server/env";
-import { checkAndSpend } from "../server/budget";
 import { recordLedger } from "../server/ledger";
 import { b64ToVec, cosine, shortHash, vecToB64 } from "./util";
 
@@ -42,9 +40,8 @@ async function embedBatch(env: Env, provider: "nvidia" | "qwen", inputs: string[
     await recordLedger(env, { userId: null, kind: "egress", what: NVIDIA_EMBEDDING_MODEL, region: "integrate.api.nvidia.com", action: "allowed", bytes, masked: 0, detail: { public: true } }).catch(() => undefined);
     return out;
   }
-  const est = embeddingCostUsd(Math.ceil(bytes / 3));
-  if (!(await checkAndSpend(env, "tf_usd", est))) throw new Error("over budget");
-  const { vectors } = await embedTokenFactory(env.NEBIUS_API_KEY, inputs);
+  // Reserved and settled against the daily Token Factory cap; over the cap or switched off it throws and ranking falls back to lexical.
+  const { vectors } = await meteredEmbed(env, inputs);
   await recordLedger(env, { userId: null, kind: "model", what: EMBEDDING_MODEL, action: "allowed", bytes, masked: 0, detail: { public: true } }).catch(() => undefined);
   return vectors;
 }

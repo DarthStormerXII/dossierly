@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { EMBEDDING_MODEL, TOKENFACTORY_BASE_URL } from "../config";
+import { estimateInputTokens } from "./cost";
 import type { ChatClient, ChatRequest, ChatResult, TokenLogprob } from "./types";
 import { ModelError } from "./types";
 
@@ -44,16 +45,16 @@ export function createTokenFactoryClient(apiKey: string): ChatClient {
         const res = await sdk.chat.completions.create(body as unknown as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
         const choice = res.choices[0];
         const content = choice?.message?.content;
-        if (!content) throw new ModelError("Model returned an empty reply", "model_error");
         const u = res.usage as (OpenAI.CompletionUsage & { prompt_tokens_details?: { cached_tokens?: number } }) | undefined;
+        // No usage in a reply: assume the worst for metering (all of max_tokens), never zero.
+        const usage = u
+          ? { tokensIn: u.prompt_tokens ?? 0, tokensOut: u.completion_tokens ?? 0, cachedTokens: u.prompt_tokens_details?.cached_tokens ?? 0 }
+          : { tokensIn: estimateInputTokens(req.messages), tokensOut: req.maxTokens, cachedTokens: 0 };
+        if (!content) throw new ModelError("Model returned an empty reply", "model_error", 502, usage);
         const lp = choice.logprobs?.content as Array<{ token: string; logprob: number }> | null | undefined;
         return {
           content,
-          usage: {
-            tokensIn: u?.prompt_tokens ?? 0,
-            tokensOut: u?.completion_tokens ?? 0,
-            cachedTokens: u?.prompt_tokens_details?.cached_tokens ?? 0,
-          },
+          usage,
           logprobs: lp?.map((t): TokenLogprob => ({ token: t.token, logprob: t.logprob })),
         };
       } catch (err) {

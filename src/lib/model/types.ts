@@ -51,6 +51,7 @@ export type ModelErrorCode =
   | "model_unavailable"
   | "invalid_output"
   | "over_budget"
+  | "models_disabled"
   | "bad_request";
 
 export class ModelError extends Error {
@@ -58,6 +59,8 @@ export class ModelError extends Error {
     message: string,
     readonly code: ModelErrorCode,
     readonly status: number = 502,
+    /** Tokens the provider billed before the call failed (an empty reply); the meter settles to these. */
+    readonly usage?: Usage,
   ) {
     super(message);
     this.name = "ModelError";

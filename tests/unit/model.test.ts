@@ -96,13 +96,13 @@ describe("runModel", () => {
     expect(runs.results).toEqual([{ feature: "interpret", ran_on: "cloud" }]);
   });
 
-  it("serves the recorded fixture as replay once the daily cap is spent, without calling the model", async () => {
+  it("refuses with over_budget once the daily cap is spent, never calling the model or serving a recording", async () => {
     const env = freshLocalEnv({ NEBIUS_API_KEY: "test-key" });
     expect(await checkAndSpend(env, "tf_usd", GLOBAL_CAPS.tf_usd)).toBe(true);
     const { client, calls } = fake('{"translation":"LIVE"}');
-    const out = await runModel({ env, userId: "u1", client }, base());
-    expect(out.data.translation).toBe("REPLAY");
-    expect(out.run).toMatchObject({ ranOn: "replay", costUsd: 0, tokensIn: 0 });
+    await expect(runModel({ env, userId: "u1", client }, base())).rejects.toMatchObject({
+      code: "over_budget", status: 429, message: "Daily limit reached. Try again after 08:00 MYT.",
+    });
     expect(calls).toHaveLength(0);
   });
 
