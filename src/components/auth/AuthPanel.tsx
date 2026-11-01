@@ -41,7 +41,6 @@ export function AuthPanel({ mode }: { mode: Mode }) {
       <div className="auth-side">
         <div className="auth-top">
           <Link href="/" className="logo-link" aria-label="Dossierly home"><Logo size={24} /></Link>
-          <Link href="/" className="auth-back"><span aria-hidden="true">←</span> Back to site</Link>
         </div>
       <div className="auth-card">
         <div className="auth-icon"><Icon name="lock" size={22} /></div>
