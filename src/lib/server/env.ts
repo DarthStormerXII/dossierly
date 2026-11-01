@@ -48,7 +48,7 @@ export type Env = {
   BRIDGE_SECRET: string;
   SESSION_SECRET: string;
   RESEND_API_KEY?: string;
-  /** Bare verified Dossierly sender address, not another product's shared default. */
+  /** Bare verified sender selected for this environment. QA may use the shared mail service. */
   EMAIL_FROM?: string;
   DODO_PAYMENTS_API_KEY: string;
   DODO_WEBHOOK_KEY: string;

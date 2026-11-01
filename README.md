@@ -114,6 +114,31 @@ npm run deploy:cf              # build with OpenNext and deploy the Worker (wran
 
 The bridge (`bridge/`) runs on a machine with NVIDIA NemoClaw installed; see `bridge/ops/`. The Guardrails audit job is in `jobs/guardrails-audit/` (`launch.sh` starts it with the Nebius CLI).
 
+### Cloudflare QA
+
+The durable integration preview is [dossierly-qa.gabrielaxy.workers.dev](https://dossierly-qa.gabrielaxy.workers.dev).
+The named `qa` environment in `wrangler.jsonc` uses a separate Worker, EU D1 database,
+KV namespace, EU R2 bucket, Durable Objects and Workflows. Its self-reference targets
+`dossierly-qa`; it has no cron. These commands do not publish the production Worker or Pages front:
+
+```bash
+npm run qa:migrate             # only the QA database
+npm run qa:build               # Next.js + OpenNext
+npm run qa:deploy              # custom worker/index.ts, named QA target only
+```
+
+QA has its own session/bridge secrets and vault-backed email credentials in Cloudflare.
+`EMAIL_FROM` selects the verified QA sender; a Resend send-only key cannot list domains,
+and the `resend.dev` testing sender only delivers to the Resend account owner.
+Email codes have no callback URL. Same-origin auth checks use QA's exact `APP_URL`,
+and browser API calls stay relative to that origin. Future OAuth/payment callbacks must
+be registered for this QA host separately from production.
+
+Model calls are disabled and payment credentials are not provisioned in QA. Browser rendering,
+email authentication and free-account flows can be checked without inference or live charges.
+Use correction worktrees for independent code, then integrate compatible checkpoints into
+this product QA preview. Publish production only after Gabriel explicitly approves the target.
+
 ## Operator and licence
 
 Operated by Gokul Nath (individual), contact darthstormer.ai@gmail.com. MIT licence, see [`LICENSE`](LICENSE).
