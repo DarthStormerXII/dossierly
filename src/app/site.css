@@ -86,8 +86,6 @@
 .auth-side { display: flex; flex-direction: column; padding: 20px 24px 40px; }
 @media (min-width: 960px) { .auth-side { padding: 28px 48px 48px; } }
 .auth-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.auth-back { font-size: 0.875rem; font-weight: 500; color: var(--ink-3); text-decoration: none; }
-.auth-back:hover { color: var(--ink); }
 .auth-card { width: min(400px, 100%); margin: auto; padding: 48px 0 24px; display: grid; gap: 14px; }
 .auth-card h1 { font-size: 2rem; margin: 0; letter-spacing: -0.03em; }
 .auth-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); }

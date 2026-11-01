@@ -114,7 +114,6 @@ export function EmailCodeForm({ onVerified }: { onVerified(): void }) {
         {error && <p className="error-box small" role="alert">{error}</p>}
         {notice && <p className="small muted" role="status">{notice}</p>}
       </div>
-      <p className="tiny muted">Your account follows your email. Your encrypted case stays in this browser; signing in elsewhere won’t restore it.</p>
     </form>
   );
 }
