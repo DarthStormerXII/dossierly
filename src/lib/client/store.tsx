@@ -2,9 +2,9 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { signInUrl } from "./account";
-import { api, ensureSession, startSession } from "./api";
+import { api, ensureSession, startSession, type AccountMe } from "./api";
 import { emptyCase, sampleCase } from "./sample";
-import type { Case, Language, Me, Run, Status } from "./types";
+import type { Case, Language, Run, Status } from "./types";
 import { destroyVault, loadDoc, openVault, saveDoc, unlock, type VaultKind } from "@/lib/vault";
 
 export type RunLog = Run & { feature: string; ts: number };
@@ -33,7 +33,7 @@ type Ctx = {
   phase: Phase;
   vaultKind: VaultKind | null;
   dossier: Dossier | null;
-  me: Me | null;
+  me: AccountMe | null;
   status: Status | null;
   startSample(): Promise<void>;
   startOwn(name: string, language: Language, office: string): Promise<void>;
@@ -52,16 +52,16 @@ export function CaseProvider({ children }: { children: React.ReactNode }) {
   const [phase, setPhase] = useState<Phase>("loading");
   const [vaultKind, setVaultKind] = useState<VaultKind | null>(null);
   const [dossier, setDossier] = useState<Dossier | null>(null);
-  const [me, setMe] = useState<Me | null>(null);
+  const [me, setMe] = useState<AccountMe | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const ref = useRef<Dossier | null>(null);
 
-  const load = useCallback(async () => {
-    const v = await openVault();
+  const load = useCallback(async (accountId: string) => {
+    const v = await openVault(accountId);
     if (v.status === "unavailable") return setPhase("unavailable");
     setVaultKind(v.kind);
     if (v.status === "locked") return setPhase("locked");
-    const d = await loadDoc<Dossier>(DOC);
+    const d = await loadDoc<Dossier>(DOC, accountId);
     ref.current = d;
     setDossier(d);
     setPhase(d ? "ready" : "empty");
@@ -69,10 +69,8 @@ export function CaseProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Async initial load from the encrypted vault; state is set after the awaits resolve.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void load();
     void ensureSession().then((r) => {
-      if (r.ok) return setMe(r.data);
+      if (r.ok) { setMe(r.data); return load(r.data.accountId); }
       // Expired or invalid session: back to sign-in, then return here.
       if (r.status === 401) window.location.replace(signInUrl());
     });
@@ -82,11 +80,12 @@ export function CaseProvider({ children }: { children: React.ReactNode }) {
   }, [load]);
 
   const persist = useCallback(async (d: Dossier) => {
+    if (!me) throw new Error("No signed-in account");
+    await saveDoc(DOC, d, me.accountId);
     ref.current = d;
     setDossier(d);
     setPhase("ready");
-    await saveDoc(DOC, d);
-  }, []);
+  }, [me]);
 
   const value = useMemo<Ctx>(() => ({
     phase, vaultKind, dossier, me, status, setVaultKind,
@@ -112,18 +111,26 @@ export function CaseProvider({ children }: { children: React.ReactNode }) {
     },
     unlockVault: async () => {
       await unlock();
-      await load();
+      if (me) await load(me.accountId);
     },
     refreshMe: async () => {
       const r = await api.me();
-      if (r.ok) setMe(r.data);
+      if (r.ok) {
+        if (me && me.accountId !== r.data.accountId) {
+          ref.current = null;
+          setDossier(null);
+          setPhase("loading");
+          await load(r.data.accountId);
+        }
+        setMe(r.data);
+      }
     },
     wipe: async () => {
       await destroyVault();
       ref.current = null;
       setPhase("loading");
       setDossier(null);
-      await load();
+      if (me) await load(me.accountId);
     },
   }), [phase, vaultKind, dossier, me, status, persist, load]);
 

@@ -30,6 +30,25 @@ export const idbGet = <T>(key: string) => tx<T | undefined>("readonly", (s) => s
 export const idbSet = (key: string, value: unknown) => tx("readwrite", (s) => s.put(value, key));
 export const idbDel = (key: string) => tx("readwrite", (s) => s.delete(key));
 
+/** Remove one account's keys/documents, preserving all other accounts and unowned legacy data. */
+export async function idbDeletePrefix(prefix: string): Promise<void> {
+  const db = await open();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const t = db.transaction(STORE, "readwrite");
+      const req = t.objectStore(STORE).openCursor();
+      req.onsuccess = () => {
+        const cursor = req.result;
+        if (!cursor) return;
+        if (typeof cursor.key === "string" && cursor.key.startsWith(prefix)) cursor.delete();
+        cursor.continue();
+      };
+      t.oncomplete = () => resolve();
+      t.onerror = t.onabort = () => reject(t.error ?? new Error("IndexedDB transaction failed"));
+    });
+  } finally { db.close(); }
+}
+
 export function idbDestroy(): Promise<void> {
   return new Promise((resolve) => {
     const req = indexedDB.deleteDatabase(DB_NAME);
