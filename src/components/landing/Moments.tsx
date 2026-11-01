@@ -30,7 +30,7 @@ const MOMENTS: Moment[] = [
   },
 ];
 
-/** Real-life moments: framed photos in Beside's staggered two-up grid, with the middle one wide. */
+/** Real-life moments with a full-row table-mode feature. */
 export function Moments() {
   return (
     <section className="lp-sec" aria-labelledby="moments-h">
@@ -47,7 +47,9 @@ export function Moments() {
             <div key={m.n} className={`lp-moment${m.wide ? " lp-moment-wide" : ""}`} data-reveal>
               <div className="lp-moment-frame">
                 <div className="lp-moment-img">
-                  <Image src={m.src} alt={m.alt} fill sizes="(max-width: 767px) 100vw, (max-width: 1199px) 45vw, 560px" />
+                  <Image src={m.src} alt={m.alt} fill sizes={m.wide
+                    ? "(max-width: 767px) calc(100vw - 48px), (max-width: 1023px) calc((100vw - 112px) * 0.575), (max-width: 1199px) calc((100vw - 160px) * 0.575), (max-width: 1399px) calc((100vw - 176px) * 0.575), 703px"
+                    : "(max-width: 767px) calc(100vw - 48px), (max-width: 1023px) calc((100vw - 112px) / 2), (max-width: 1199px) calc((100vw - 160px) / 2), (max-width: 1399px) calc((100vw - 208px) / 4), 298px"} />
                 </div>
               </div>
               <div className="lp-moment-text">

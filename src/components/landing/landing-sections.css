@@ -50,25 +50,29 @@
   .lp-hiw-card > .lp-ui { width: 100%; max-width: 440px; }
 }
 
-/* Moments photo grid */
-.lp-moments { display: grid; gap: 40px; }
-.lp-moment-frame { position: relative; border-radius: 12px; overflow: hidden; }
-.lp-moment-img { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 12px; }
+/* Moments photo grid: edge-to-edge photos, with one full-row feature. */
+.lp-moments { display: grid; gap: 40px 32px; }
+.lp-moment { min-width: 0; }
+.lp-moment-frame { position: relative; border-radius: 16px; overflow: hidden; background: var(--lp-frame); }
+.lp-moment-img { position: relative; width: 100%; height: 100%; aspect-ratio: 4 / 3; }
 .lp-moment-img img { object-fit: cover; }
-.lp-moment-text { display: grid; gap: 10px; margin-top: 16px; }
-.lp-moment-n { font-size: 13px; color: var(--lp-muted); }
+.lp-moment-text { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 12px; margin-top: 20px; }
+.lp-moment-n { padding-top: 3px; font-size: 13px; line-height: 20px; color: var(--lp-muted); }
 .lp-moment h3 { font-size: 16px; line-height: 24px; font-weight: 500; }
 .lp-moment p { margin-top: 6px; font-size: 14px; line-height: 22px; color: var(--lp-muted); }
-.lp-moment .lp-moment-tags { margin-top: 10px; font-size: 13px; color: color-mix(in srgb, var(--lp-muted) 75%, transparent); }
+.lp-moment .lp-moment-tags { margin-top: 12px; font-size: 12px; line-height: 19px; }
 @media (min-width: 768px) {
-  .lp-moments { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
-  .lp-moment { grid-column: span 2; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
-  .lp-moment-wide { grid-column: 2 / span 3; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
-  .lp-moment-frame { display: grid; place-items: center; aspect-ratio: 5 / 4; border-radius: 18px; background: var(--lp-frame); }
-  .lp-moment-wide .lp-moment-frame { aspect-ratio: 2.58 / 1; }
-  .lp-moment-img { width: 67%; aspect-ratio: 67 / 47; border-radius: 6px; }
-  .lp-moment-wide .lp-moment-img { width: 41%; aspect-ratio: 16 / 9; }
-  .lp-moment-text { margin-top: 0; align-content: space-between; }
+  .lp-moments { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px 32px; }
+  .lp-moment-wide { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+  .lp-moment-wide .lp-moment-img { aspect-ratio: 3 / 2; }
+  .lp-moment-wide .lp-moment-text { margin-top: 0; }
+}
+@media (min-width: 1200px) {
+  .lp-moment { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
+  .lp-moment-img { aspect-ratio: 4 / 5; }
+  .lp-moment-text { margin-top: 0; grid-template-columns: 1fr; gap: 16px; }
+  .lp-moment-wide { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 48px; }
+  .lp-moment-wide .lp-moment-text { max-width: 340px; justify-self: center; }
 }
 
 /* Phone section */
@@ -98,6 +102,16 @@
 .lp-trio-well { flex: 1; display: grid; align-content: center; margin: 20px 12px 12px; padding: 20px 14px; min-height: 240px; border-radius: 14px; background: var(--lp-stone); }
 
 /* All one system */
+/* Theme-aware partner wall. Keep monochrome marks legible without a light panel. */
+.lp-logos { --lp-logo-filter: grayscale(1); list-style: none; padding: 0; margin: 0 0 40px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; border: 1px solid var(--lp-hair); border-radius: 16px; overflow: hidden; background: var(--lp-hair); }
+.lp-logos li { display: grid; justify-items: center; align-content: center; gap: 14px; min-height: 132px; padding: 24px 18px; text-align: center; background: var(--lp-stone); }
+.lp-logos img { width: auto; max-width: 100%; object-fit: contain; filter: var(--lp-logo-filter); opacity: 0.85; transition: opacity 0.2s; }
+.lp-logos li:hover img { opacity: 1; }
+.lp-logos span { max-width: 260px; font-size: 12px; color: var(--lp-muted); line-height: 18px; text-wrap: balance; }
+@media (min-width: 768px) { .lp-logos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .lp-logos { --lp-logo-filter: grayscale(1) invert(1) brightness(1.8); } }
+:root[data-theme="dark"] .lp-logos { --lp-logo-filter: grayscale(1) invert(1) brightness(1.8); }
+
 .lp-parts { display: grid; gap: 28px 32px; }
 @media (min-width: 640px) { .lp-parts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1024px) { .lp-parts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 40px; } }
