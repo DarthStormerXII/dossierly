@@ -10,7 +10,7 @@ const MAX_AGE = 60 * 60 * 24 * 400;
 
 export type PlanKind = "free" | "case_pass" | "judge";
 export type Plan = { kind: PlanKind; creditsLeft: number; expiresAt?: string | null; family?: boolean };
-export type AccountKind = "passkey" | "device";
+export type AccountKind = "email" | "passkey" | "device";
 export type ActiveCase = "own" | "sample";
 
 export type UserState = {
@@ -30,6 +30,7 @@ export type UserState = {
 type Row = {
   plan_kind: PlanKind; plan_expires_at: number | null; credits: number; family: number;
   account_kind: AccountKind | null; plan_chosen: number; active_case: ActiveCase; letters_used: number;
+  email_user: string | null;
 };
 
 async function sign(env: Env, userId: string): Promise<string> {
@@ -64,14 +65,14 @@ export const userIdFromRequest = (req: Request, env: Env) => userIdFromCookieHea
 /** Resolve a user row; expired passes fall back to free. `userId` here is the row id (the account). */
 export async function loadUserState(env: Env, userId: string): Promise<UserState | null> {
   const row = await env.DB.prepare(
-    "SELECT plan_kind, plan_expires_at, credits, family, account_kind, plan_chosen, active_case, letters_used FROM users WHERE id = ?",
+    "SELECT plan_kind, plan_expires_at, credits, family, account_kind, plan_chosen, active_case, letters_used, (SELECT user_id FROM email_identities WHERE user_id = users.id) AS email_user FROM users WHERE id = ?",
   ).bind(userId).first<Row>();
   if (!row) return null;
   const expired = row.plan_kind !== "free" && row.plan_expires_at !== null && row.plan_expires_at < Date.now();
   return {
     userId,
     accountId: userId,
-    accountKind: row.account_kind,
+    accountKind: row.email_user ? "email" : row.account_kind,
     activeCase: row.active_case === "sample" ? "sample" : "own",
     plan: {
       kind: expired ? "free" : row.plan_kind,
@@ -90,8 +91,8 @@ export async function ensureUser(env: Env, userId: string): Promise<void> {
   await env.DB.prepare("INSERT OR IGNORE INTO users (id, created_at) VALUES (?, ?)").bind(userId, Date.now()).run();
 }
 
-/** Creates an account row (passkey or device). Callers set the cookie with `sessionCookie`. */
-export async function createAccountUser(env: Env, userId: string, kind: AccountKind): Promise<void> {
+/** Legacy account row helper. Email accounts are created through emailAccount after verification. */
+export async function createAccountUser(env: Env, userId: string, kind: "passkey" | "device"): Promise<void> {
   await env.DB.prepare("INSERT INTO users (id, created_at, account_kind) VALUES (?, ?, ?)").bind(userId, Date.now(), kind).run();
 }
 

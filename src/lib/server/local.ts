@@ -38,19 +38,25 @@ function localDb(): D1Like {
   for (const f of fs.readdirSync(dir).filter((n) => n.endsWith(".sql")).sort()) {
     db.exec(fs.readFileSync(path.join(dir, f), "utf8"));
   }
+  // D1 serializes transactional batches; mirror that when concurrent requests share SQLite.
+  let batches: Promise<unknown> = Promise.resolve();
   return {
     prepare: (sql) => new LocalStmt(db, sql),
-    async batch(stmts) {
-      db.exec("BEGIN");
-      try {
-        const out = [];
-        for (const s of stmts) out.push(await s.run());
-        db.exec("COMMIT");
-        return out;
-      } catch (e) {
-        db.exec("ROLLBACK");
-        throw e;
-      }
+    batch(stmts) {
+      const result = batches.then(async () => {
+        db.exec("BEGIN");
+        try {
+          const out = [];
+          for (const s of stmts) out.push(await s.run());
+          db.exec("COMMIT");
+          return out;
+        } catch (e) {
+          db.exec("ROLLBACK");
+          throw e;
+        }
+      });
+      batches = result.catch(() => undefined);
+      return result;
     },
   };
 }
@@ -128,6 +134,8 @@ export function localEnv(): Env {
     NVIDIA_API_KEY: e.NVIDIA_API_KEY ?? "",
     BRIDGE_SECRET: e.BRIDGE_SECRET ?? "local-bridge-secret",
     SESSION_SECRET: e.SESSION_SECRET ?? "local-session-secret-not-for-production",
+    RESEND_API_KEY: e.RESEND_API_KEY ?? "",
+    EMAIL_FROM: e.EMAIL_FROM ?? "",
     DODO_PAYMENTS_API_KEY: e.DODO_PAYMENTS_API_KEY ?? "",
     DODO_WEBHOOK_KEY: e.DODO_WEBHOOK_KEY ?? "",
     JUDGE_CODE: e.JUDGE_CODE ?? "",

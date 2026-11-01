@@ -47,6 +47,9 @@ export type Env = {
   NVIDIA_API_KEY: string;
   BRIDGE_SECRET: string;
   SESSION_SECRET: string;
+  RESEND_API_KEY?: string;
+  /** Bare verified Dossierly sender address, not another product's shared default. */
+  EMAIL_FROM?: string;
   DODO_PAYMENTS_API_KEY: string;
   DODO_WEBHOOK_KEY: string;
   JUDGE_CODE: string;
@@ -66,6 +69,7 @@ const STRING_KEYS = [
   "NEBIUS_API_KEY", "TAVILY_API_KEY", "NVIDIA_API_KEY", "BRIDGE_SECRET", "SESSION_SECRET",
   "DODO_PAYMENTS_API_KEY", "DODO_WEBHOOK_KEY", "JUDGE_CODE", "DODO_PRODUCT_CASE_PASS",
   "DODO_PRODUCT_CREDITS_10", "DODO_PRODUCT_CREDITS_25", "DODO_PRODUCT_FAMILY", "APP_URL",
+  "RESEND_API_KEY", "EMAIL_FROM",
 ] as const;
 
 function readCloudflare(): Partial<Env> | null {

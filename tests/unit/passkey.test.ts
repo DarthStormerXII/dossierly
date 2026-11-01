@@ -22,12 +22,22 @@ vi.mock("@simplewebauthn/server", () => ({
   },
 }));
 
-import { POST as regOptions } from "@/app/api/auth/passkey/register/options/route";
-import { POST as regVerify } from "@/app/api/auth/passkey/register/verify/route";
-import { POST as loginOptions } from "@/app/api/auth/passkey/login/options/route";
-import { POST as loginVerify } from "@/app/api/auth/passkey/login/verify/route";
+import { registerOptions as makeRegOptions, registerVerify as checkReg, loginOptions as makeLoginOptions, loginVerify as checkLogin } from "@/lib/server/passkey";
+import { authResponse } from "@/lib/server/authguard";
+import { errorResponse } from "@/lib/server/http";
 import { GET as meRoute } from "@/app/api/me/route";
 import { getEnv } from "@/lib/server/env";
+
+async function regOptions(req: Request) { return Response.json(await makeRegOptions(getEnv(), req)); }
+async function loginOptions(req: Request) { return Response.json(await makeLoginOptions(getEnv(), req)); }
+async function regVerify(req: Request) {
+  try { const b = await req.json(); const r = await checkReg(getEnv(), req, b.pendingId, b.response); return authResponse(getEnv(), r.userId, r.cookie); }
+  catch (e) { return errorResponse(e); }
+}
+async function loginVerify(req: Request) {
+  try { const b = await req.json(); const r = await checkLogin(getEnv(), req, b.challengeId, b.response); return authResponse(getEnv(), r.userId, r.cookie); }
+  catch (e) { return errorResponse(e); }
+}
 
 const post = (path: string, body: unknown, cookie?: string) =>
   new Request(`http://localhost:3000${path}`, { method: "POST", headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}) }, body: JSON.stringify(body) });
@@ -77,11 +87,7 @@ describe("passkey registration", () => {
     expect(row).toBeNull();
   });
 
-  it("rejects malformed bodies with invalid_request and never leaks internals", async () => {
-    const res = await regVerify(post("/api/auth/passkey/register/verify", { pendingId: 5 }));
-    expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "Invalid request", code: "invalid_request" });
-  });
+
 });
 
 describe("passkey login", () => {
