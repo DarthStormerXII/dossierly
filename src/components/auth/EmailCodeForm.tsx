@@ -6,7 +6,7 @@ import { emailError, emailSchema, requestEmailCode } from "@/lib/client/email-au
 
 type Challenge = { id: string; email: string; expiresAt: number };
 
-export function EmailCodeForm({ onVerified }: { onVerified(): void }) {
+export function EmailCodeForm({ heading, onVerified }: { heading: string; onVerified(): void }) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [challenge, setChallenge] = useState<Challenge | null>(null);
@@ -45,7 +45,7 @@ export function EmailCodeForm({ onVerified }: { onVerified(): void }) {
     setChallenge({ id: r.data.challengeId, email: parsed.data, expiresAt: time + r.data.expiresIn * 1000 });
     setRetryAt(time + r.data.resendAfter * 1000);
     setCode(""); setSpent(false);
-    setNotice(challenge ? "A new code is on its way. Use the code from the latest email." : "Code sent. Check your inbox and spam folder.");
+    setNotice(challenge ? "Use the code from the latest email." : "");
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -70,13 +70,13 @@ export function EmailCodeForm({ onVerified }: { onVerified(): void }) {
   }
 
   return (
-    <form className="auth-email-form" onSubmit={(event) => void submit(event)} noValidate aria-busy={busy !== null}>
+    <form className="auth-email-form" onSubmit={(event) => void submit(event)} noValidate aria-busy={busy !== null} aria-labelledby="auth-heading">
+      <div className="auth-heading">
+        <h1 id="auth-heading">{challenge ? "Check your email" : heading}</h1>
+        {challenge && <p id="auth-recipient" className="small muted">We sent a code to <strong>{challenge.email}</strong></p>}
+      </div>
       {challenge ? (
         <>
-          <div className="auth-recipient">
-            <p className="small">Enter the code sent to <strong>{challenge.email}</strong></p>
-            <button type="button" className="btn btn-ghost btn-small" onClick={changeEmail} disabled={busy !== null}>Change email</button>
-          </div>
           <label className="field">
             <span>Six-digit code</span>
             <input ref={codeInput} className="input auth-code" name="code" type="text" inputMode="numeric"
@@ -86,15 +86,18 @@ export function EmailCodeForm({ onVerified }: { onVerified(): void }) {
                 const pasted = event.clipboardData.getData("text").replace(/[\s-]/g, "");
                 if (/^\d{6}$/.test(pasted)) { event.preventDefault(); setCode(pasted); setError(""); }
               }}
-              disabled={busy !== null || spent || expired} aria-describedby="code-help auth-feedback" aria-invalid={!!error} />
+              disabled={busy !== null || spent || expired} aria-describedby="auth-recipient code-help auth-feedback" aria-invalid={!!error} />
           </label>
-          <p id="code-help" className="tiny muted">{expired ? "This code has expired. Request a new one below." : "Your code expires in 10 minutes. Use it only on Dossierly."}</p>
+          <p id="code-help" className="tiny muted">{expired ? "This code has expired. Request a new one below." : "The code expires in 10 minutes."}</p>
           <button className="btn btn-primary btn-block" type="submit" disabled={busy !== null || spent || expired}>
             {busy === "verify" ? "Signing you in…" : "Verify and continue"}
           </button>
-          <button className="btn btn-ghost btn-block" type="button" onClick={() => void send()} disabled={busy !== null || seconds > 0}>
-            {busy === "send" ? "Sending a new code…" : seconds > 0 ? `Resend code in ${seconds}s` : "Resend code"}
-          </button>
+          <div className="auth-code-actions">
+            <button className="btn btn-ghost btn-small" type="button" onClick={() => void send()} disabled={busy !== null || seconds > 0}>
+              {busy === "send" ? "Sending a new code…" : seconds > 0 ? `Resend code in ${seconds}s` : "Resend code"}
+            </button>
+            <button type="button" className="btn btn-ghost btn-small" onClick={changeEmail} disabled={busy !== null}>Change email</button>
+          </div>
         </>
       ) : (
         <>
@@ -106,7 +109,7 @@ export function EmailCodeForm({ onVerified }: { onVerified(): void }) {
               aria-describedby="auth-feedback" aria-invalid={!!error} />
           </label>
           <button className="btn btn-primary btn-block" type="submit" disabled={busy !== null || seconds > 0}>
-            {busy === "send" ? "Sending your code…" : seconds > 0 ? `Send code in ${seconds}s` : "Send me a code"}
+            {busy === "send" ? "Sending your code…" : seconds > 0 ? `Continue in ${seconds}s` : "Continue"}
           </button>
         </>
       )}

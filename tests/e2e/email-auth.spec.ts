@@ -27,7 +27,7 @@ async function mockApi(page: Page) {
 async function requestCode(page: Page, path = "/signin") {
   await page.goto(path);
   await page.getByLabel("Email address").fill(address);
-  await page.getByRole("button", { name: "Send me a code" }).click();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.getByLabel("Six-digit code")).toBeVisible();
 }
 
@@ -38,11 +38,11 @@ for (const width of [390, 820, 1440]) {
     await page.goto("/signup");
     await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
     await expect(page.getByRole("button", { name: /passkey|device only/i })).toHaveCount(0);
-    await page.getByRole("button", { name: "Send me a code" }).click();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
     await expect(page.locator(".auth-email-form").getByRole("alert")).toHaveText("Enter a valid email address.");
     const email = `ananya.${"r".repeat(48)}@${"d".repeat(54)}.example.com`;
     await page.getByLabel("Email address").fill(email);
-    await page.getByRole("button", { name: "Send me a code" }).click();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
     await expect(page.getByLabel("Six-digit code")).toBeFocused();
     await expect(page.getByText(email, { exact: true })).toBeVisible();
     await expect(page.getByLabel("Six-digit code")).toHaveAttribute("autocomplete", "one-time-code");
@@ -136,12 +136,12 @@ test("request loading prevents duplicates; outage and offline errors can be retr
   });
   await page.goto("/signin");
   await page.getByLabel("Email address").fill(address);
-  await page.getByRole("button", { name: "Send me a code" }).click();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.getByRole("button", { name: "Sending your code…" })).toBeDisabled();
   release();
   await expect(page.locator(".auth-email-form").getByRole("alert")).toContainText("We can’t complete email sign-in right now");
   await page.route("**/api/auth/email/request", (route) => route.abort());
-  await page.getByRole("button", { name: "Send me a code" }).click();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.locator(".auth-email-form").getByRole("alert")).toContainText("You seem to be offline");
 });
 
