@@ -1,10 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { POST as regOptions } from "@/app/api/auth/passkey/register/options/route";
-import { POST as regVerify } from "@/app/api/auth/passkey/register/verify/route";
-import { POST as loginOptions } from "@/app/api/auth/passkey/login/options/route";
-import { POST as loginVerify } from "@/app/api/auth/passkey/login/verify/route";
+import { registerOptions as makeRegOptions, registerVerify as checkReg, loginOptions as makeLoginOptions, loginVerify as checkLogin } from "@/lib/server/passkey";
+import { getEnv } from "@/lib/server/env";
+import { authResponse } from "@/lib/server/authguard";
+import { errorResponse } from "@/lib/server/http";
 import { GET as meRoute } from "@/app/api/me/route";
 import { b64url, fromBase64 } from "@/lib/server/util";
+
+async function regOptions(req: Request) { return Response.json(await makeRegOptions(getEnv(), req)); }
+async function loginOptions(req: Request) { return Response.json(await makeLoginOptions(getEnv(), req)); }
+async function regVerify(req: Request) {
+  try { const b = await req.json(); const r = await checkReg(getEnv(), req, b.pendingId, b.response); return authResponse(getEnv(), r.userId, r.cookie); }
+  catch (e) { return errorResponse(e); }
+}
+async function loginVerify(req: Request) {
+  try { const b = await req.json(); const r = await checkLogin(getEnv(), req, b.challengeId, b.response); return authResponse(getEnv(), r.userId, r.cookie); }
+  catch (e) { return errorResponse(e); }
+}
 
 /* A software authenticator (ES256, "none" attestation) so the real @simplewebauthn/server verifies a full ceremony. */
 const enc = new TextEncoder();

@@ -53,13 +53,14 @@ describe("account guard", () => {
     expect(after!.n).toBe(before!.n);
   });
 
-  it("device sign-up creates an account and a usable cookie; sign-out clears it", async () => {
+  it("device sign-up is retired without creating an account; sign-out still clears cookies", async () => {
+    const before = await getEnv().DB.prepare("SELECT COUNT(*) AS n FROM users").first<{ n: number }>();
     const res = await deviceRoute(json(null, "/api/auth/device", {}));
-    expect(res.status).toBe(200);
-    const cookie = res.headers.get("set-cookie")!.split(";")[0];
-    const body = await res.json();
-    expect(body).toMatchObject({ accountKind: "device", activeCase: "own", planChosen: false, lettersUsed: 0, freeLetters: 3 });
-    expect((await meRoute(json(cookie, "/api/me", undefined, "GET"))).status).toBe(200);
+    expect(res.status).toBe(410);
+    expect(await res.json()).toMatchObject({ code: "email_signin_required" });
+    expect(res.headers.get("set-cookie")).toBeNull();
+    const after = await getEnv().DB.prepare("SELECT COUNT(*) AS n FROM users").first<{ n: number }>();
+    expect(after!.n).toBe(before!.n);
     expect((await signoutRoute()).headers.get("set-cookie")).toMatch(/settla_uid=;.*Max-Age=0/);
   });
 
