@@ -15,6 +15,9 @@
     "build:cf": "opennextjs-cloudflare build",
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy:cf": "opennextjs-cloudflare build && wrangler deploy",
+    "qa:build": "opennextjs-cloudflare build --env qa",
+    "qa:deploy": "wrangler deploy worker/index.ts --config wrangler.jsonc --env qa --no-autoconfig --keep-vars",
+    "qa:migrate": "wrangler d1 migrations apply DB --config wrangler.jsonc --remote --env qa",
     "db:migrate": "wrangler d1 migrations apply settla-db --remote",
     "db:migrate:local": "wrangler d1 migrations apply settla-db --local"
   },

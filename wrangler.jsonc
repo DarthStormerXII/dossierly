@@ -22,6 +22,36 @@
     { "name": "settla-nightly-watch", "binding": "NIGHTLY_WATCH", "class_name": "NightlyWatch" }
   ],
   "triggers": { "crons": ["0 2 * * *"] },
+  "env": {
+    "qa": {
+      "name": "dossierly-qa",
+      "workers_dev": true,
+      "preview_urls": false,
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "dossierly-qa" }],
+      "d1_databases": [
+        { "binding": "DB", "database_name": "dossierly-qa-auth", "database_id": "1d80b377-29eb-4c24-9803-9c91bf988d40", "migrations_dir": "migrations" }
+      ],
+      "kv_namespaces": [{ "binding": "CACHE", "id": "d84242270e6f4bff91b378722f42ce27" }],
+      "r2_buckets": [{ "binding": "BLOBS", "bucket_name": "dossierly-qa-auth", "jurisdiction": "eu" }],
+      "durable_objects": { "bindings": [{ "name": "USER_DO", "class_name": "UserDO" }] },
+      "workflows": [
+        { "name": "dossierly-qa-prepare-fallback", "binding": "PREPARE_FALLBACK", "class_name": "PrepareFallback" },
+        { "name": "dossierly-qa-letter-pipeline", "binding": "LETTER_PIPELINE", "class_name": "LetterPipeline" },
+        { "name": "dossierly-qa-nightly-watch", "binding": "NIGHTLY_WATCH", "class_name": "NightlyWatch" }
+      ],
+      "triggers": { "crons": [] },
+      "vars": {
+        "APP_ENV": "preview",
+        "APP_URL": "https://dossierly-qa.gabrielaxy.workers.dev",
+        "MODELS_DISABLED": "1",
+        "DODO_ENV": "test",
+        "DODO_PRODUCT_CASE_PASS": "pdt_0Nqo8xdjjAa1SQUGHKfZ7",
+        "DODO_PRODUCT_CREDITS_10": "pdt_0Nqo8xo9gXhejHssrLeSZ",
+        "DODO_PRODUCT_CREDITS_25": "pdt_0Nqo8y23gjaWIvquo4g3U",
+        "DODO_PRODUCT_FAMILY": "pdt_0Nqo8y7aeu9duJkiA3Wmu"
+      }
+    }
+  },
   "vars": {
     "APP_ENV": "preview",
     "DODO_ENV": "test",
