@@ -23,13 +23,12 @@ export async function requestEmailCode(email: string): Promise<ApiResult<EmailCh
 
 export function emailError(f: ApiFailure): string {
   if (f.status === 0) return "You seem to be offline. Check your connection and try again.";
-  if (f.status === 429) return "Too many requests. Wait a minute before trying again.";
   switch (f.code) {
     case "invalid_email": return "Enter a valid email address.";
     case "invalid_code": return "That code didn’t match. Check the six digits in your latest email and try again.";
     case "expired_code": return "That code has expired. Request a new code to continue.";
     case "too_many_attempts": return "Too many attempts with this code. Request a new code to try again.";
     case "rate_limited": return "Too many requests. Wait a minute before trying again.";
-    default: return "We can’t complete email sign-in right now. Please try again in a few minutes.";
+    default: return f.status === 429 ? "Too many requests. Wait a minute before trying again." : "We can’t complete email sign-in right now. Please try again in a few minutes.";
   }
 }

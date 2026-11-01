@@ -32,7 +32,10 @@ export function challengeCookie(env: Env, value: string, age = EMAIL_TTL) {
 
 export function checkEmailOrigin(req: Request, env: Env) {
   const origin = req.headers.get("origin");
-  const expected = new URL(env.APP_ENV === "local" ? req.url : env.APP_URL || req.url).origin;
+  const url = new URL(req.url);
+  // Next's local server normalizes req.url to localhost; the browser may use 127.0.0.1.
+  const local = req.headers.get("host") ? `${url.protocol}//${req.headers.get("host")}` : url.origin;
+  const expected = env.APP_ENV === "local" ? local : new URL(env.APP_URL || req.url).origin;
   if (origin !== expected) throw new ApiError(403, "Reload this page and try again.", "invalid_origin");
 }
 

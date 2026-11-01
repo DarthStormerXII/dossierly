@@ -33,12 +33,6 @@ function DeleteCard() {
   const del = async () => {
     setBusy(true);
     await wipe();
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-    } catch {
-      // storage may be blocked; the vault itself is already destroyed
-    }
     router.push("/app");
   };
   return (

@@ -9,6 +9,7 @@ const PROCESSORS = [
   ["Tavily", "Fetches public official web pages for preparation. Never receives your case", "—"],
   ["NVIDIA (API catalog)", "Embeddings of public official page text only. Never receives your case", "—"],
   ["Dodo Payments", "Merchant of record: payment, invoices, VAT", "Their own privacy policy applies"],
+  ["Resend", "Delivers sign-in codes to your email address", "Receives the address and the code; its own privacy policy applies"],
 ];
 
 export default function PrivacyPolicy() {
@@ -27,6 +28,7 @@ export default function PrivacyPolicy() {
         <tbody>
           <tr><td>Your case (profile, events, documents, deadlines, wrap-ups, letter explanations)</td><td>Your device only (IndexedDB)</td><td>Encrypted with AES-GCM; new cases use a non-exportable device key. Earlier encryption records are preserved.</td></tr>
           <tr><td>Your account id, sign-in email, and plan; earlier account credentials are preserved</td><td>Cloudflare D1, EU</td><td>Your email is used to send sign-in codes. Email sign-in does not recover local case data.</td></tr>
+          <tr><td>Sign-in challenges</td><td>Cloudflare D1, EU</td><td>Codes are stored as a keyed hash and expire after 10 minutes. Expired challenges are removed on later code requests.</td></tr>
           <tr><td>Ledger and run logs (model, time, bytes, masked count, cost)</td><td>Cloudflare D1, EU</td><td>Hash-chained; no conversation text</td></tr>
           <tr><td>Deadline reminders</td><td>Cloudflare, EU</td><td>Only a date and a short label</td></tr>
           <tr><td>Letter images</td><td>Sent to the model to be read; not kept by us</td><td>If saving is offered later, encrypted on your device before upload</td></tr>

@@ -2,8 +2,8 @@
 
 **A personal AI caseworker for life abroad.** Each person gets their own private AI agent that remembers their whole case. It prepares them for official appointments, interprets while they talk to the official, reads the letters that follow and counts the deadlines. Poland is the first supported country.
 
-- Live demo: **https://dossierly.pages.dev** (passkey account, no email or password; start with Arjun's sample case, or your own)
-- Judges: sign up (passkey or "this device only"), choose Plus on the plan step and enter **`DOSSIERLYJUDGES`**: checkout total becomes $0. The free tier already covers three letters, preparation and interpreting.
+- Live demo: **https://dossierly.pages.dev**; start with Arjun's sample case, or your own. The email-code-only sign-in rollout is staged pending a working product email sender; the live deployment has not been replaced yet.
+- Judges: sign up, choose Plus on the plan step and enter **`DOSSIERLYJUDGES`**: checkout total becomes $0. The free tier already covers three letters, preparation and interpreting.
 - Built for the Nebius × NVIDIA Global AI Hackathon, Personal AI track, during the hackathon period
 
 Dossierly interprets and explains. It never gives legal or medical advice, and says so on screen.
@@ -78,7 +78,7 @@ Honest caveats. The data is synthetic and written by one model, the test set is 
 
 - One sandbox per person, a published network policy, and a ledger of every network call the agent made, from OpenShell's own log.
 - Personal identifiers (PESEL, passport and case numbers, names, addresses) are masked before any model call and restored in the answer.
-- The case lives on the device, encrypted with AES-GCM; with a passkey that supports PRF, the key is derived from the passkey.
+- The case lives on the device, encrypted with AES-GCM. The staged email-code flow separates saved cases by authenticated account and uses a non-exportable device key; older encryption records remain preserved and are not automatically claimed by a new email account. Signing in elsewhere cannot recover browser-local case data.
 - Every model call is listed in the ledger, which is hash-chained.
 - Nebius does not train on customer data. Token Factory's Zero Data Retention will be switched on at the production launch; it is off during the hackathon for speed.
 

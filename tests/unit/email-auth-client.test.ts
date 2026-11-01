@@ -66,4 +66,8 @@ describe("email client boundary", () => {
     expect(offline.ok).toBe(false);
     if (!offline.ok) expect(emailError(offline)).toContain("Check your connection");
   });
+
+  it("offers a new code when the server locks guesses, rather than a generic 429 retry", () => {
+    expect(emailError({ ok: false, status: 429, code: "too_many_attempts", error: "private" })).toContain("Request a new code");
+  });
 });

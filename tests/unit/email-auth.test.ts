@@ -119,6 +119,9 @@ describe("code failure and abuse boundaries", () => {
     await expect(requestEmailCode(env, req(), { email: "arjun.raman@example.org" })).rejects.toMatchObject({ code: "email_unavailable" });
     expect(() => checkEmailOrigin(req("", {}, "https://other.example"), env)).toThrow();
     expect(() => checkEmailOrigin(req(), env)).not.toThrow();
+    const normalized = new Request("http://localhost:3242/api/auth/email/request", { headers: { origin: "http://127.0.0.1:3242", host: "127.0.0.1:3242" } });
+    expect(() => checkEmailOrigin(normalized, env)).not.toThrow();
+    expect(() => checkEmailOrigin(normalized, { ...env, APP_ENV: "production", APP_URL: "https://dossierly.pages.dev" })).toThrow();
   });
 
   it("keeps retired device/passkey routes disabled without issuing a session", async () => {
