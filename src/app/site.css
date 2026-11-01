@@ -80,30 +80,16 @@
 .faq-item p { color: var(--ink-2); margin: 0 0 18px; }
 .pricing-final { margin: 80px auto 0; max-width: 920px; padding: 56px 24px; border-radius: var(--radius-lg); background: var(--surface-2); text-align: center; display: grid; justify-items: center; gap: 12px; }
 
-/* Sign up / sign in: full screen, split */
-.auth { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1fr); background: var(--bg); }
-@media (min-width: 960px) { .auth { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
-.auth-side { display: flex; flex-direction: column; padding: 20px 24px 40px; }
-@media (min-width: 960px) { .auth-side { padding: 28px 48px 48px; } }
-.auth-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.auth-card { width: min(400px, 100%); margin: auto; padding: 48px 0 24px; display: grid; gap: 14px; }
-.auth-card h1 { font-size: 2rem; margin: 0; letter-spacing: -0.03em; }
-.auth-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); }
-.auth-points { list-style: none; padding: 0; margin: 4px 0 6px; display: grid; gap: 8px; font-size: 0.9375rem; color: var(--ink-2); }
-.auth-points li { display: grid; grid-template-columns: 20px 1fr; gap: 8px; }
-.auth-points svg { margin-top: 3px; color: var(--ink-3); }
-.auth-or { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: 0.8125rem; }
-.auth-or::before, .auth-or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.auth-foot { text-align: center; font-size: 0.875rem; color: var(--ink-2); margin: 4px 0 0; }
-.auth-visual { display: none; position: relative; margin: 12px; border-radius: var(--radius-lg); overflow: hidden; background: #2b2a28; }
-@media (min-width: 960px) { .auth-visual { display: block; } }
-.auth-visual-img { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(20 19 18 / 5%) 35%, rgb(20 19 18 / 75%)), url(/landing/table-mode.jpg) center / cover; }
-.auth-quote { position: absolute; left: 32px; right: 32px; bottom: 32px; display: grid; gap: 10px; color: #fff; max-width: 440px; }
-.auth-quote p { margin: 6px 0 0; color: rgb(255 255 255 / 82%); font-size: 0.9375rem; }
-.auth-bubble { padding: 12px 16px; border-radius: 14px; font-size: 0.9375rem; backdrop-filter: blur(14px); box-shadow: 0 0 0 1px rgb(255 255 255 / 14%); }
-.auth-bubble small { display: block; font-size: 0.75rem; opacity: 0.75; margin-bottom: 2px; }
-.auth-bubble.official { background: rgb(90 61 176 / 45%); }
-.auth-bubble.you { background: rgb(143 83 0 / 45%); margin-left: 32px; }
+/* Sign up / sign in: focused email-code flow. */
+.auth { min-height: 100dvh; display: grid; place-items: center; padding: 48px 24px; background: var(--bg); }
+.auth-card { width: min(360px, 100%); min-width: 0; display: grid; gap: 24px; }
+.auth-brand { justify-self: center; margin-bottom: 8px; }
+.auth-heading { display: grid; gap: 10px; margin-bottom: 8px; text-align: center; }
+.auth-card h1 { font-size: 1.5rem; line-height: 1.25; margin: 0; letter-spacing: -0.03em; }
+.auth-heading p { overflow-wrap: anywhere; }
+.auth-heading strong { font-weight: 500; color: var(--ink); }
+.auth-legal { margin: 0; text-align: center; text-wrap: balance; }
+.auth-legal a { color: inherit; text-underline-offset: 3px; }
 .compare { max-width: 920px; margin: 80px auto 0; }
 .compare h2 { text-align: center; margin-bottom: 20px; }
 .compare-scroll { overflow-x: auto; border-radius: var(--radius-lg); box-shadow: var(--ring); background: var(--surface); }
@@ -117,8 +103,7 @@
 .auth-email-form { display: grid; gap: 14px; min-width: 0; }
 .auth-email-form p { margin: 0; }
 .auth-email-form .input { width: 100%; min-width: 0; }
-.auth-recipient { display: grid; gap: 4px; min-width: 0; }
-.auth-recipient p { overflow-wrap: anywhere; }
-.auth-recipient button { justify-self: start; padding-left: 0; }
+.auth-code-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
+.auth-code-actions .btn { min-height: 40px; padding: 0; }
 .auth-code { font-size: 1.375rem; letter-spacing: 0.3em; font-variant-numeric: tabular-nums; }
 #auth-feedback:empty { display: none; }
