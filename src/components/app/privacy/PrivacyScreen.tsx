@@ -3,42 +3,24 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useCase } from "@/lib/client/store";
-import { passkeySupported, protectWithPasskey } from "@/lib/vault";
 import { Icon } from "../../Icon";
 import { LedgerPanel } from "./LedgerPanel";
 import { RunsPanel } from "./RunsPanel";
 
 function VaultCard() {
-  const { vaultKind, setVaultKind } = useCase();
-  const [msg, setMsg] = useState("");
-  const upgrade = async () => {
-    setMsg("");
-    try {
-      await protectWithPasskey(["dossier"]);
-      setVaultKind("passkey");
-      setMsg("Done. Your case is now encrypted with a key only your passkey can recreate.");
-    } catch (e) {
-      const m = e instanceof Error ? e.message : "";
-      setMsg(m === "prf_unsupported" ? "This browser or passkey cannot derive encryption keys (WebAuthn PRF). Your case stays encrypted with the device key." : "Passkey setup was cancelled.");
-    }
-  };
   return (
     <section className="card stack" aria-labelledby="vault-h" style={{ ["--gap" as string]: "10px" }}>
       <div className="row between">
         <h2 id="vault-h" className="h-card">Your case on this device</h2>
         <span className="chip"><Icon name="lock" size={14} /> AES-256-GCM</span>
       </div>
-      {vaultKind === "passkey" ? (
-        <p className="small" style={{ margin: 0 }}>Encrypted with a key derived from your passkey (WebAuthn PRF). Without the passkey, the stored case cannot be read.</p>
-      ) : (
-        <>
-          <p className="small" style={{ margin: 0 }}>
-            Encrypted with a random <b>device key</b> that this browser keeps and cannot export. Honest limit: anyone using this unlocked device and browser profile can open the case. A passkey closes that gap.
-          </p>
-          {passkeySupported() && <button className="btn btn-small" onClick={() => void upgrade()}>Protect with a passkey</button>}
-        </>
-      )}
-      {msg && <p className="small" role="status" style={{ margin: 0 }}>{msg}</p>}
+      <p className="small" style={{ margin: 0 }}>
+        Your case is encrypted in this browser. For new cases, a non-exportable device key protects the saved data.
+        Anyone using this unlocked browser profile may be able to open it.
+      </p>
+      <p className="small muted" style={{ margin: 0 }}>
+        Email codes let you return to your account. They do not unlock older encrypted cases or recover data removed from this browser.
+      </p>
     </section>
   );
 }

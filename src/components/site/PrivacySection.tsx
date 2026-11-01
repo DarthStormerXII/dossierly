@@ -4,7 +4,7 @@ const POINTS = [
   { t: "A sandbox per person", d: "Your agent runs in its own NVIDIA OpenShell sandbox with a network policy. Requests outside the allow-list are blocked and logged." },
   { t: "A ledger of every call", d: "Every model call and every network request your agent makes is written to a hash-chained ledger you can open in the app." },
   { t: "IDs masked first", d: "Your name, case number, PESEL and addresses are replaced with placeholders before any model sees the text." },
-  { t: "Encrypted with your passkey", d: "The case lives on your phone, encrypted with AES-GCM. With a passkey, the key is derived from it and never stored." },
+  { t: "Encrypted on your device", d: "The case stays in your browser, encrypted with AES-GCM. Email sign-in gives you account access; it does not transfer your saved case." },
   { t: "No training on your data", d: "Nebius does not train on it and every call is sent with storage off. Zero Data Retention is switched on at production launch." },
 ];
 

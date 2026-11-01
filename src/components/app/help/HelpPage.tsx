@@ -16,7 +16,7 @@ const STEPS: { icon: IconName; title: string; body: string; href: string }[] = [
 
 const FAQ: { q: string; a: string }[] = [
   { q: "Where is my case stored?", a: "On this device, encrypted. Your private agent keeps a masked copy in its own sandbox so it can remember. Names and case numbers are masked before any model call." },
-  { q: "Can I open my case on another device?", a: "Your passkey signs you in anywhere, but the case itself stays on the device where you made it. The sample case is available everywhere." },
+  { q: "Can I open my case on another device?", a: "Sign in with a code sent to your email. Your account and plan are available on another device, but your encrypted case stays in the browser where you made it. Email sign-in cannot restore a missing local case. The sample case is available everywhere." },
   { q: "What if my agent is offline?", a: "The same step runs in the cloud instead, after 20 seconds, and the screen says so." },
   { q: "How do I delete everything?", a: "Privacy ledger, then Delete everything. It removes the case from this device and clears your agent's memory." },
   { q: "Who can I write to?", a: "darthstormer.ai@gmail.com. Dossierly is operated by Gokul Nath." },

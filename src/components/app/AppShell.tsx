@@ -44,7 +44,7 @@ function AgentBadge() {
 }
 
 function Body({ children }: { children: React.ReactNode }) {
-  const { phase, unlockVault } = useCase();
+  const { phase } = useCase();
   if (phase === "loading") return <div className="app-pad"><Loading label="Opening your encrypted case…" /></div>;
   if (phase === "unavailable")
     return (
@@ -56,10 +56,9 @@ function Body({ children }: { children: React.ReactNode }) {
   if (phase === "locked")
     return (
       <div className="app-pad card stack">
-        <span className="tab-label"><Icon name="lock" size={16} /> Locked with your passkey</span>
-        <h2>Unlock your case</h2>
-        <p className="muted">Your case is encrypted with a key that only your passkey can recreate.</p>
-        <button className="btn btn-primary" onClick={() => void unlockVault().catch(() => undefined)}>Unlock with passkey</button>
+        <span className="tab-label"><Icon name="lock" size={16} /> Stored case locked</span>
+        <h2>Your existing case is preserved</h2>
+        <p className="muted">This case uses an earlier encryption setup that is not available in the current sign-in flow. Email sign-in cannot unlock it. The stored case has not been changed.</p>
       </div>
     );
   if (phase === "empty") return <Onboarding />;

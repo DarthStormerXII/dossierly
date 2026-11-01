@@ -19,7 +19,7 @@ export type PlanKind = "free" | "case_pass" | "judge";
 export type Plan = { kind: PlanKind; creditsLeft: number; expiresAt?: string | null; family?: boolean };
 export type Me = {
   userId: string; plan: Plan; freeLetterUsed: boolean;
-  planChosen?: boolean; lettersUsed?: number; freeLetters?: number; activeCase?: "own" | "sample"; accountKind?: "passkey" | "device";
+  planChosen?: boolean; lettersUsed?: number; freeLetters?: number; activeCase?: "own" | "sample"; accountKind?: "email" | "passkey" | "device";
 };
 
 export type Status = {
