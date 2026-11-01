@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type {
   AgentTask, Case, CaseEvent, Interpretation, Intro, Language, Ledger, Letter, LetterLink, LetterRead, Me, Plan,
   Product, Status, TurnInput, WatchResult, WrapResult,
@@ -46,7 +47,7 @@ async function raw<T>(path: string, init?: RequestInit): Promise<ApiResult<T>> {
 /** The signed-in account as returned by /api/me, /api/session and every sign-in route. */
 export type Account = {
   accountId: string;
-  accountKind: "passkey" | "device";
+  accountKind: "email" | "passkey" | "device";
   activeCase: "own" | "sample";
   plan: Plan;
   planChosen: boolean;
@@ -89,51 +90,28 @@ export async function startSession(sample: boolean): Promise<ApiResult<AccountMe
   return mapAccount(await switchCase(sample));
 }
 
-export const passkeySupported = (): boolean => typeof window !== "undefined" && !!window.PublicKeyCredential;
-
-/** Codes: `cancelled` (prompt closed), `exists` (this device already has a passkey), `unsupported`, `no_credential` (sign-in found no account). */
-async function ceremony(run: () => Promise<ApiResult<Account>>, signIn: boolean): Promise<ApiResult<Account>> {
-  try {
-    const r = await run();
-    return !r.ok && r.code === "passkey_unknown" ? { ...r, code: "no_credential" } : r;
-  } catch (e) {
-    const name = (e as { name?: string })?.name;
-    if (name === "NotAllowedError" || name === "AbortError") {
-      return { ok: false, status: 0, error: signIn ? "No passkey was chosen" : "The passkey prompt was closed or timed out", code: "cancelled" };
-    }
-    if (name === "InvalidStateError") return { ok: false, status: 409, error: "This device already has a Dossierly passkey. Sign in instead.", code: "exists" };
-    return { ok: false, status: 0, error: "Passkeys are not available in this browser", code: "unsupported" };
+/** Email verification signs in and refreshes the account used by the case store. */
+export async function verifyEmailCode(challengeId: string, code: string): Promise<ApiResult<Account>> {
+  if (!challengeId || !/^\d{6}$/.test(code)) {
+    return { ok: false, status: 400, code: "invalid_code", error: "Enter the six-digit code from your email." };
   }
+  const r = await raw<unknown>("/api/auth/email/verify", {
+    method: "POST", body: JSON.stringify({ challengeId, code }),
+  });
+  if (!r.ok) return r;
+  const parsed = z.object({
+    accountId: z.string().min(1), accountKind: z.literal("email"),
+    activeCase: z.enum(["own", "sample"]), planChosen: z.boolean(),
+    lettersUsed: z.number().int().nonnegative(), freeLetters: z.number().int().nonnegative(),
+    plan: z.object({
+      kind: z.enum(["free", "case_pass", "judge"]), creditsLeft: z.number(),
+      expiresAt: z.string().nullable().optional(), family: z.boolean().optional(),
+    }),
+  }).safeParse(r.data);
+  if (!parsed.success) return { ok: false, status: 502, error: "Sign-in is temporarily unavailable." };
+  sessionPromise = Promise.resolve({ ok: true, data: withLegacy(parsed.data) });
+  return { ok: true, data: parsed.data };
 }
-
-/** Creates a passkey account (no email, no password) and signs in. */
-export function passkeySignUp(label?: string): Promise<ApiResult<Account>> {
-  return ceremony(async () => {
-    const { startRegistration } = await import("@simplewebauthn/browser");
-    const opts = await raw<{ pendingId: string; options: Parameters<typeof startRegistration>[0]["optionsJSON"] }>(
-      "/api/auth/passkey/register/options", { method: "POST", body: JSON.stringify(label ? { label } : {}) },
-    );
-    if (!opts.ok) return opts;
-    const response = await startRegistration({ optionsJSON: opts.data.options });
-    return postAccount("/api/auth/passkey/register/verify", { pendingId: opts.data.pendingId, response });
-  }, false);
-}
-
-/** Signs in with an existing Dossierly passkey (discoverable: no username to type). */
-export function passkeySignIn(): Promise<ApiResult<Account>> {
-  return ceremony(async () => {
-    const { startAuthentication } = await import("@simplewebauthn/browser");
-    const opts = await raw<{ challengeId: string; options: Parameters<typeof startAuthentication>[0]["optionsJSON"] }>(
-      "/api/auth/passkey/login/options", { method: "POST", body: "{}" },
-    );
-    if (!opts.ok) return opts;
-    const response = await startAuthentication({ optionsJSON: opts.data.options });
-    return postAccount("/api/auth/passkey/login/verify", { challengeId: opts.data.challengeId, response });
-  }, true);
-}
-
-/** "Continue on this device": an account without a passkey, tied to this browser's cookie. */
-export const deviceSignUp = (): Promise<ApiResult<Account>> => postAccount("/api/auth/device", {});
 
 export async function signOut(): Promise<ApiResult<{ ok: true }>> {
   const r = await raw<{ ok: true }>("/api/auth/signout", { method: "POST", body: "{}" });

@@ -14,7 +14,7 @@ const PROCESSORS = [
 export default function PrivacyPolicy() {
   return (
     <article className="doc-page">
-      <span className="kicker">Privacy policy · 30 October 2026</span>
+      <span className="kicker">Privacy policy · 1 November 2026</span>
       <h1>Privacy</h1>
       <p className="lead muted">Plainly: what we process, where it is kept and how to remove it. We do not claim Dossierly is “fully private”; the app shows you a ledger instead.</p>
 
@@ -25,8 +25,8 @@ export default function PrivacyPolicy() {
       <table>
         <thead><tr><th>Data</th><th>Where</th><th>How</th></tr></thead>
         <tbody>
-          <tr><td>Your case (profile, events, documents, deadlines, wrap-ups, letter explanations)</td><td>Your device only (IndexedDB)</td><td>Encrypted with AES-GCM; key from your passkey, or a non-exportable device key</td></tr>
-          <tr><td>A pseudonymous account id, your passkey's public key, and your plan</td><td>Cloudflare D1, EU</td><td>No name or email unless you pay</td></tr>
+          <tr><td>Your case (profile, events, documents, deadlines, wrap-ups, letter explanations)</td><td>Your device only (IndexedDB)</td><td>Encrypted with AES-GCM; new cases use a non-exportable device key. Earlier encryption records are preserved.</td></tr>
+          <tr><td>Your account id, sign-in email, and plan; earlier account credentials are preserved</td><td>Cloudflare D1, EU</td><td>Your email is used to send sign-in codes. Email sign-in does not recover local case data.</td></tr>
           <tr><td>Ledger and run logs (model, time, bytes, masked count, cost)</td><td>Cloudflare D1, EU</td><td>Hash-chained; no conversation text</td></tr>
           <tr><td>Deadline reminders</td><td>Cloudflare, EU</td><td>Only a date and a short label</td></tr>
           <tr><td>Letter images</td><td>Sent to the model to be read; not kept by us</td><td>If saving is offered later, encrypted on your device before upload</td></tr>

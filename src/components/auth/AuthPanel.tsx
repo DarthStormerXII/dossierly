@@ -2,26 +2,19 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { accountState, safeNext } from "@/lib/client/account";
-import { deviceSignUp, friendlyError, passkeySignIn, passkeySignUp, passkeySupported } from "@/lib/client/api";
+import { useEffect } from "react";
+import { safeNext } from "@/lib/client/account";
+import { getMe } from "@/lib/client/api";
+import { EmailCodeForm } from "./EmailCodeForm";
 import { Icon } from "../Icon";
 import { Logo } from "../Logo";
 
 type Mode = "signup" | "signin";
 
-/** Passkey-first accounts: no email, no password. A device-only account is the fallback so nobody is ever blocked. */
+/** One email-code flow for creating an account and returning to it. */
 export function AuthPanel({ mode }: { mode: Mode }) {
   const router = useRouter();
   const params = useSearchParams();
-  const [canPasskey, setCanPasskey] = useState(true);
-  const [busy, setBusy] = useState<"passkey" | "device" | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => { void Promise.resolve(passkeySupported()).then(setCanPasskey); }, []);
-  // Already signed in: skip the form.
-  useEffect(() => { void accountState().then((s) => s === "signed-in" && next()); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
   const next = () => {
     const back = params.get("next");
     if (back) return router.replace(safeNext(back));
@@ -34,15 +27,12 @@ export function AuthPanel({ mode }: { mode: Mode }) {
     router.replace(s ? `/app?${s}` : "/app");
   };
 
-  const run = async (kind: "passkey" | "device") => {
-    setBusy(kind);
-    setError(null);
-    const r = kind === "device" ? await deviceSignUp() : mode === "signup" ? await passkeySignUp() : await passkeySignIn();
-    setBusy(null);
-    if (r.ok) return next();
-    if (r.code === "cancelled") return;
-    setError(r.code === "no_credential" ? "No Dossierly passkey on this device. Create an account instead." : friendlyError(r));
-  };
+  // Email accounts can skip the form; earlier accounts can still verify an email.
+  useEffect(() => {
+    let active = true;
+    void getMe().then((r) => { if (active && r.ok && r.data.accountKind === "email") next(); });
+    return () => { active = false; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const signup = mode === "signup";
   const qs = params.toString() ? `?${params.toString()}` : "";
@@ -57,7 +47,7 @@ export function AuthPanel({ mode }: { mode: Mode }) {
         <div className="auth-icon"><Icon name="lock" size={22} /></div>
         <h1>{signup ? "Create your account" : "Welcome back"}</h1>
         <p className="muted" style={{ margin: 0 }}>
-          {signup ? "One tap with a passkey: your face, fingerprint or screen lock. No email, no password." : "Sign in with the passkey you made for Dossierly."}
+          {signup ? "Start with your email. We’ll send a six-digit code. No password to remember." : "Enter your email and we’ll send a six-digit sign-in code."}
         </p>
         {signup && (
           <ul className="auth-points">
@@ -66,21 +56,7 @@ export function AuthPanel({ mode }: { mode: Mode }) {
             <li><Icon name="check" size={16} /><span>Free to start: three letters, preparation and interpreting</span></li>
           </ul>
         )}
-        {canPasskey && (
-          <button className="btn btn-primary btn-block" onClick={() => void run("passkey")} disabled={busy !== null}>
-            {busy === "passkey" ? "Waiting for your passkey…" : signup ? "Continue with a passkey" : "Sign in with a passkey"}
-          </button>
-        )}
-        {signup && (
-          <>
-            {canPasskey && <div className="auth-or">or</div>}
-            <button className={`btn btn-block${canPasskey ? "" : " btn-primary"}`} onClick={() => void run("device")} disabled={busy !== null}>
-              {busy === "device" ? "Creating…" : "Continue on this device only"}
-            </button>
-            <p className="tiny muted" style={{ margin: 0, textAlign: "center" }}>Without a passkey you can only return from this browser.</p>
-          </>
-        )}
-        {error && <div className="error-box small" role="alert">{error}</div>}
+        <EmailCodeForm onVerified={next} />
         <p className="auth-foot">
           {signup ? <>Already have an account? <Link href={`/signin${qs}`}>Sign in</Link></> : <>New to Dossierly? <Link href={`/signup${qs}`}>Create an account</Link></>}
         </p>
