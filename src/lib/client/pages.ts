@@ -21,7 +21,7 @@ async function imageToDataUrl(file: Blob): Promise<string> {
   return canvasToJpeg(canvas);
 }
 
-async function pdfToDataUrls(file: Blob): Promise<string[]> {
+async function pdfToDataUrls(file: Blob): Promise<{ pages: string[]; truncated: boolean }> {
   const pdfjs = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
   const doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
@@ -36,14 +36,15 @@ async function pdfToDataUrls(file: Blob): Promise<string[]> {
     await page.render({ canvas, viewport, background: "#ffffff" }).promise;
     out.push(canvasToJpeg(canvas));
   }
+  const truncated = doc.numPages > MAX_PAGES;
   await doc.destroy();
-  return out;
+  return { pages: out, truncated };
 }
 
 export async function fileToPages(file: File): Promise<{ pages: string[]; truncated: boolean }> {
+  if (file.size > 20 * 1024 * 1024) throw new Error("Choose a file smaller than 20 MB.");
   if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-    const pages = await pdfToDataUrls(file);
-    return { pages, truncated: false };
+    return pdfToDataUrls(file);
   }
   if (!file.type.startsWith("image/")) throw new Error("Choose a photo (JPEG, PNG) or a PDF.");
   return { pages: [await imageToDataUrl(file)], truncated: false };

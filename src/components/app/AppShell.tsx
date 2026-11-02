@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { CaseProvider, useCase } from "@/lib/client/store";
 import { Icon, type IconName } from "../Icon";
 import { Logo } from "../Logo";
 import { IdentityMenu } from "./IdentityMenu";
-import { Onboarding } from "./Onboarding";
 import { Loading } from "../States";
 
 type NavItem = { href: string; label: string; icon: IconName };
@@ -31,16 +29,8 @@ const GROUPS: { label: string; items: NavItem[] }[] = [
 const isActive = (path: string, href: string) => (href === "/app" ? path === "/app" : path.startsWith(href));
 
 function AgentBadge() {
-  const { status, dossier } = useCase();
-  if (!status) return <span className="chip agent-chip" aria-live="polite">Agent…</span>;
-  const online = status.bridge.online;
-  return (
-    <span className={`chip agent-chip${online ? " is-online" : ""}`} title={online ? "Your private agent sandbox is online" : "Private agent offline: tasks run in the cloud fallback"}>
-      <span className="agent-dot" aria-hidden="true" />
-      <span className="agent-label">{online ? (dossier?.sample ? "Shared sample agent" : "Agent online") : "Cloud fallback"}</span>
-      <span className="agent-short">{online ? "Agent" : "Cloud"}</span>
-    </span>
-  );
+  const { dossier } = useCase();
+  return <span className="chip">{dossier?.sample ? "Sample case" : "Private case"}</span>;
 }
 
 function Body({ children }: { children: React.ReactNode }) {
@@ -61,26 +51,13 @@ function Body({ children }: { children: React.ReactNode }) {
         <p className="muted">This case uses an earlier encryption setup that is not available in the current sign-in flow. Email sign-in cannot unlock it. The stored case has not been changed.</p>
       </div>
     );
-  if (phase === "empty") return <Onboarding />;
+  if (phase === "empty") return <div className="app-pad card stack"><h1>Your case is not on this device</h1><p>Your account has completed setup, but its encrypted case is stored on the device where you created it. This sign-in has not restored those documents.</p><Link href="/onboarding?new=1" className="btn">Start a new case on this device</Link></div>;
   return <>{children}</>;
-}
-
-/** After onboarding, everyone picks Free or Plus once; until then the app routes to the plan step. */
-function usePlanStep() {
-  const { phase, me } = useCase();
-  const path = usePathname();
-  const router = useRouter();
-  useEffect(() => {
-    if (phase !== "ready" || !me || me.planChosen !== false || path === "/app/plan") return;
-    const plus = new URLSearchParams(window.location.search).get("plan") === "plus";
-    router.replace(plus ? "/app/plan?plan=plus" : "/app/plan");
-  }, [phase, me, path, router]);
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const { dossier } = useCase();
-  usePlanStep();
   return (
     <div className="app">
       <aside className="app-side" aria-label="Case navigation">

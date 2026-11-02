@@ -16,9 +16,9 @@ const LIMIT_MESSAGE = `You have used your ${FREE_LETTERS} free letters. Upgrade 
 export async function POST(request: Request) {
   return handle(request, LettersReadRequestSchema, async (ctx, input, userId) => {
     // The shared SAMPLE case is a demo for every visitor; the daily model budget caps its cost.
-    const isSample = userId === SAMPLE_USER_ID;
-    const state = isSample ? null : await loadUserState(ctx.env, userId);
-    if (state && state.plan.kind === "free" && state.lettersUsed >= FREE_LETTERS && state.plan.creditsLeft < 1) {
+    const state = await loadUserState(ctx.env, userId);
+    const isSample = userId === SAMPLE_USER_ID || state?.activeCase === "sample";
+    if (!isSample && state && state.plan.kind === "free" && state.lettersUsed >= FREE_LETTERS && state.plan.creditsLeft < 1) {
       throw new ApiError(402, LIMIT_MESSAGE, "payment_required");
     }
     const result = await readLetter(ctx, input);

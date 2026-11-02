@@ -6,7 +6,7 @@ import { errorResponse } from "@/lib/server/http";
 export const dynamic = "force-dynamic";
 
 const ONLINE_WINDOW_MS = 60_000;
-export const MODELS = [
+const MODELS = [
   { id: "nvidia/Nemotron-3_5-Lightning", role: "turns, guard, summaries" },
   { id: "nvidia/Nemotron-3.5-Super-VL", role: "agent, vision, watcher, drafts" },
   { id: "nvidia/Nemotron-3-Ultra-550b-a55b", role: "whole-case reasoning" },

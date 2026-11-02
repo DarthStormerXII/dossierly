@@ -150,11 +150,11 @@ export const api = {
   linkLetter: (c: Case, letter: Letter, deliveryDate: string) =>
     post<LetterLink>("/api/letters/link", { letter, deliveryDate, case: c, language: c.profile.language }),
   prepare: (c: Case, appointment: { office: string; purpose: string; date: string }) =>
-    post<{ taskId: string; retrieval?: string; masked?: number }>("/api/prepare", { appointment, case: c, language: c.profile.language }),
+    post<{ taskId: string; retrieval?: import("./onboarding-state").SourceCapture; masked?: number }>("/api/prepare", { appointment, case: c, language: c.profile.language }),
   fileEvent: (c: Case, event: CaseEvent) => post<{ taskId: string }>("/api/agent/file", { event, case: c }),
   reminder: (date: string, label: string) => post<unknown>("/api/me/deadlines", { date, label: label.slice(0, 120) }),
   task: <R>(id: string) => call<AgentTask<R>>(`/api/agent/tasks/${encodeURIComponent(id)}`),
-  hubChanges: () => call<{ changes: { title: string; summary: string; url: string; detectedAt: string }[] }>("/api/hub/changes?country=pl"),
+  hubChanges: () => call<{ changes: { title: string; summary: string; url: string; detectedAt: string }[]; checkedAt?: string | null; kind?: "official_pages"; personalApplicationStatus?: false }>("/api/hub/changes?country=pl"),
   asrStart: (audioB64: string, lang: "pl" | "en" | "uk" | "hi" | "ta", translate?: "en" | "pl") =>
     post<{ id: string }>("/api/asr", translate ? { audio: audioB64, lang, translate } : { audio: audioB64, lang }),
   asrGet: (id: string) =>

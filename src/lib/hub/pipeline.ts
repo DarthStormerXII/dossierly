@@ -17,7 +17,7 @@ export interface HubContext {
   passages: Array<{ url: string; title: string; text: string; score: number }>;
   changes: HubChange[];
   phrases: Array<{ local: string; user: string }>;
-  retrieval: { embeddings: EmbedProvider; pages: number; origin: Origin | "snapshot" | "none" };
+  retrieval: { embeddings: EmbedProvider; pages: number; origin: Origin | "snapshot" | "none"; sources: Array<{ url: string; fetchedAt: string | null; kind: "snapshot" | "bundled" | "extract" }> };
 }
 
 const TOPIC_WORDS: Array<[string, RegExp]> = [
@@ -84,12 +84,13 @@ export async function buildHubContext(
   const query = `${i.appointment.purpose} ${i.appointment.office} ${topics.join(" ")} karta pobytu`;
   const picked = pickSources(topics);
   const pages: Array<{ source: HubSource; text: string }> = [];
+  const provenance: HubContext["retrieval"]["sources"] = [];
   const missing: HubSource[] = [];
   for (const s of picked) {
     const snap = await latestSnapshot(env, COUNTRY, s.url).catch(() => null);
     const bundled = bundledPages.find((b) => b.url === s.url);
-    if (snap?.content) pages.push({ source: s, text: snap.content });
-    else if (bundled) pages.push({ source: s, text: bundled.text });
+    if (snap?.content) { pages.push({ source: s, text: snap.content }); provenance.push({ url: s.url, fetchedAt: new Date(snap.fetched_at).toISOString(), kind: "snapshot" }); }
+    else if (bundled) { pages.push({ source: s, text: bundled.text }); provenance.push({ url: s.url, fetchedAt: bundled.fetchedAt, kind: "bundled" }); }
     else missing.push(s);
   }
   let origin: HubContext["retrieval"]["origin"] = pages.length ? "snapshot" : "none";
@@ -99,7 +100,7 @@ export async function buildHubContext(
     origin = ex.origin;
     for (const p of ex.pages) {
       const source = missing.find((m) => m.url === p.url) ?? missing.find((m) => p.url.startsWith(m.url));
-      if (source) pages.push({ source, text: p.text });
+      if (source) { pages.push({ source, text: p.text }); provenance.push({ url: source.url, fetchedAt: null, kind: "extract" }); }
     }
   }
   const passages: Passage[] = [
@@ -117,7 +118,7 @@ export async function buildHubContext(
     passages: top.map((p) => ({ url: p.url, title: p.title, text: p.text, score: Number(p.score.toFixed(4)) })),
     changes: (await mergedChanges(env, 5)),
     phrases: phrasesFor(topics, i.language),
-    retrieval: { embeddings: provider, pages: pages.length, origin },
+    retrieval: { embeddings: provider, pages: pages.length, origin, sources: provenance },
   };
 }
 

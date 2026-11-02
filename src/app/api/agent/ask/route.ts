@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const rl = await rateLimit(env, userId, "agent_ask", 12, 60);
     if (!rl.ok) return jsonError(429, "Too many requests. Try again shortly.", "rate_limited", { "retry-after": String(rl.retryAfterSec) });
     const body = await boundedJson(req, AskRequestSchema, 100_000);
-    const masker = maskerFor({ name: body.case.profile.name, caseNumber: body.case.caseNumber, addresses: body.case.profile.addresses as string[] | undefined });
+    const masker = maskerFor({ name: body.case.profile.name, caseNumber: body.case.caseNumber, addresses: body.case.profile.addresses });
     const masked = masker.maskDeep(body);
     const hub = await buildHubContext(env, { userId, appointment: { office: masked.case.office, purpose: masked.question }, language: body.language });
     const { taskId } = await enqueueAgentTask(env, { userId, kind: "ask", input: {

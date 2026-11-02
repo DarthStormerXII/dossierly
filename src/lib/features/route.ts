@@ -11,7 +11,8 @@ import { boundedJson, sameOrigin } from "../server/request";
 export async function handle<I, O>(request: Request, schema: ZodType<I>, run: (ctx: Ctx, input: I, userId: string) => Promise<O>) {
   try {
     sameOrigin(request, getEnv());
-    const { userId } = await requireUser(request);
+    // A sample context is fictional data, never an authorization principal for private input or tasks.
+    const { accountId: userId } = await requireUser(request);
     const body = await boundedJson(request, { parse: (value) => value }, 25_000_000);
     const parsed = schema.safeParse(body);
     if (!parsed.success) {

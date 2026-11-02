@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    const { userId } = await requireUser(req);
+    const { accountId: userId } = await requireUser(req);
     const { id } = await ctx.params;
     const env = getEnv();
     const row = await getTask(env, id);
