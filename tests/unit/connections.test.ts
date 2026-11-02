@@ -40,6 +40,12 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe("owned provider connections", () => {
+  it("uses Workers-supported manual redirect handling and never follows a credential-bearing redirect", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: "https://other.example" } }));
+    await expect(connect(env, "u1", request(), { category: "mail", provider: "gmail" })).rejects.toMatchObject({ code: "provider_unavailable" });
+    expect(vi.mocked(fetch).mock.calls[0][1]?.redirect).toBe("manual");
+    expect(vi.mocked(fetch).mock.calls).toHaveLength(1);
+  });
   it("reports unavailable without provider configuration and never fabricates connected state", async () => {
     env.COMPOSIO_API_KEY = "";
     const r = await status(env, "u1"); expect(r.connections).toEqual({ mail: null, calendar: null }); expect(r.capabilities.every(c => !c.available)).toBe(true);

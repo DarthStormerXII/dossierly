@@ -9,7 +9,8 @@ export async function broker(env: ConnectionsEnv, path: string, body?: unknown, 
   let res: Response;
   try { res = await fetch(`https://backend.composio.dev/api/v3.1/${path}`, { method,
     headers: { "x-api-key": env.COMPOSIO_API_KEY, "content-type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(20_000), redirect: "error" }); }
+    // Workers rejects redirect:"error" before sending. Manual mode keeps credentials on this exact origin.
+    body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(20_000), redirect: "manual" }); }
   catch { throw new ApiError(502, "The connection provider did not respond. Try again.", "provider_unavailable"); }
   if (!res.ok) {
     await res.body?.cancel();
