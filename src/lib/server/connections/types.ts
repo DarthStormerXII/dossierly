@@ -7,6 +7,7 @@ export type ConnectionsEnv = Env & {
   COMPOSIO_GOOGLECALENDAR_AUTH_CONFIG_ID?: string;
   COMPOSIO_MICROSOFTCALENDAR_AUTH_CONFIG_ID?: string;
   COMPOSIO_GMAIL_DISABLED_REASON?: string;
+  COMPOSIO_GMAIL_TEST_USERS?: string;
 };
 export const categorySchema = z.enum(["mail", "calendar"]);
 export const providerSchema = z.enum(["gmail", "outlook", "googlecalendar", "microsoftcalendar"]);

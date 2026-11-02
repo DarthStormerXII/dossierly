@@ -2,7 +2,7 @@ import { call } from "./api";
 export type Category = "mail" | "calendar";
 export type Provider = "gmail" | "outlook" | "googlecalendar" | "microsoftcalendar";
 export type Connection = { provider: Provider; category: Category; label: string; status: "connected" | "reconnect"; scopes: string[]; connectedAt: number };
-export type Connections = { cleanupPending?: boolean; cleanupNotice?: string; capabilities: { provider: Provider; category: Category; available: boolean; reason?: string }[]; connections: { mail: Connection | null; calendar: Connection | null } };
+export type Connections = { cleanupPending?: boolean; cleanupNotice?: string; capabilities: { provider: Provider; category: Category; available: boolean; reason?: string; notice?: string }[]; connections: { mail: Connection | null; calendar: Connection | null } };
 export type MailMessage = { id: string; from: string; subject: string; date: string; snippet: string; hasAttachments: boolean };
 export type MailImport = { kind: "message"; messageId: string; subject: string; from: string; text: string; attachments: { id: string; name: string; mime: string; size: number }[] } | { kind: "attachment"; file: { name: string; mime: string; dataUrl: string } };
 const post = <T>(path: string, body: unknown) => call<T>(`/api/connections/${path}`, { method: "POST", body: JSON.stringify(body) });
