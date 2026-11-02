@@ -167,6 +167,10 @@ describe("email API and provider", () => {
     env.RESEND_API_KEY = "unit-only"; env.EMAIL_FROM = "login@dossierly.example";
     await sendEmailCode(env, "arjun@example.org", "123456", "challenge-test");
     expect(send.mock.calls[0]).toMatchObject(["https://api.resend.com/emails", { headers: { "idempotency-key": "dossierly-signin/challenge-test" } }]);
+    const payload = JSON.parse((send.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
+    expect(payload.html).toContain("123456");
+    expect(payload.html).toContain("Your sign-in code");
+    expect(payload.text).toContain("123456");
     vi.stubGlobal("fetch", async () => Response.json({ private: "do not expose" }, { status: 401 }));
     await expect(sendEmailCode(env, "arjun@example.org", "123456", "other")).rejects.toMatchObject({ status: 503, code: "email_unavailable" });
   });

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { Env } from "./env";
 import { ApiError } from "./http";
+import { emailCodeTemplate } from "./email-code-template";
 
 export type SendCode = (email: string, code: string, challengeId: string) => Promise<void>;
 
@@ -25,7 +26,7 @@ export async function sendEmailCode(env: Env, email: string, code: string, chall
         from: `Dossierly <${env.EMAIL_FROM}>`,
         to: [email],
         subject: "Your Dossierly sign-in code",
-        text: `Your Dossierly sign-in code is ${code}.\n\nIt expires in 10 minutes and can be used once. Enter it only in the browser where you requested it.\n\nIf you did not request this code, you can ignore this email.`,
+        ...emailCodeTemplate(code),
       }),
       signal: AbortSignal.timeout(15_000),
     });
