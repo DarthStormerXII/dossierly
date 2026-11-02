@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent } from "react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { verifyEmailCode } from "@/lib/client/api";
@@ -71,6 +71,17 @@ export function EmailCodeForm({ heading, onVerified }: { heading: string; onVeri
     requestAnimationFrame(() => emailInput.current?.focus());
   }
 
+  function pasteCode(event: ClipboardEvent<HTMLInputElement>) {
+    const pasted = event.clipboardData.getData("text").replace(/[\s-]/g, "");
+    const disabled = busy !== null || pending.current || spent || expired;
+    if (!disabled && !/^\d{6}$/.test(pasted)) return;
+    // Full codes replace partial input before input-otp's insertion handler runs.
+    event.preventDefault();
+    event.stopPropagation();
+    if (disabled) return;
+    setCode(pasted); setError("");
+  }
+
   return (
     <form className="auth-email-form" onSubmit={(event) => void submit(event)} noValidate aria-busy={busy !== null} aria-labelledby="auth-heading">
       <div className="auth-heading">
@@ -84,6 +95,7 @@ export function EmailCodeForm({ heading, onVerified }: { heading: string; onVeri
             <InputOTP ref={codeInput} id="auth-code" name="code" inputMode="numeric"
               autoComplete="one-time-code" pattern={REGEXP_ONLY_DIGITS} maxLength={6} required value={code}
               onChange={(value) => { setCode(value); setError(""); }}
+              onPasteCapture={pasteCode}
               pasteTransformer={(value) => value.replace(/[\s-]/g, "")}
               disabled={busy !== null || spent || expired} aria-describedby="auth-recipient code-help auth-feedback" aria-invalid={!!error}>
               <InputOTPGroup>

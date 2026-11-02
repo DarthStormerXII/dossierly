@@ -184,11 +184,40 @@ test("digit slots support leading zeros, keyboard editing and rejecting letters"
   await code.pressSequentially("012345");
   await expect(code).toHaveValue("012345");
   await expect(page.locator('[data-slot="input-otp-slot"]').first()).toHaveText("0");
+  await expect(page.locator('[data-slot="input-otp-slot"]').nth(5)).toHaveAttribute("data-active", "true");
   await code.press("ArrowLeft");
+  await expect(page.locator('[data-slot="input-otp-slot"]').nth(4)).toHaveAttribute("data-active", "true");
   await code.press("Backspace");
   await expect(code).toHaveValue("01235");
   await code.pressSequentially("a");
   await expect(code).toHaveValue("01235");
   await code.fill("");
   await expect(page.locator('[data-slot="input-otp-slot"]').first()).toHaveAttribute("data-active", "true");
+});
+
+test("full-code paste replaces partial input, retains focus and respects expiry", async ({ page }) => {
+  await mockApi(page);
+  await page.clock.install();
+  await requestCode(page);
+  const code = page.getByLabel("Six-digit code");
+  const paste = (value: string) => code.evaluate((input, text) => {
+    const data = new DataTransfer(); data.setData("text", text);
+    input.dispatchEvent(new ClipboardEvent("paste", { clipboardData: data, bubbles: true, cancelable: true }));
+  }, value);
+  for (const [pasted, expected] of [["123 456", "123456"], ["012-345", "012345"]]) {
+    await code.fill("12");
+    await paste(pasted);
+    await expect(code).toHaveValue(expected);
+    await expect(code).toBeFocused();
+  }
+  await expect(page.locator('[data-slot="input-otp-slot"]').first()).toHaveText("0");
+  await code.fill("12");
+  await paste("34");
+  await expect(code).toHaveValue("1234");
+  await paste("a12345");
+  await expect(code).toHaveValue("1234");
+  await page.clock.fastForward(601_000);
+  await expect(code).toBeDisabled();
+  await paste("654321");
+  await expect(code).toHaveValue("1234");
 });
