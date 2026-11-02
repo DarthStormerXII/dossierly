@@ -44,7 +44,9 @@ test("main priority stays within selected needs, including removal and empty sel
   await expect(page.locator(".op-preview").getByRole("alert")).toContainText("Choose at least one");
   const letters = page.getByRole("checkbox", { name: /^Understand letters/ });
   const deadlines = page.getByRole("checkbox", { name: /^Track deadlines/ });
-  await letters.press("Space"); await deadlines.press("Space");
+  await expect(letters).toBeFocused();
+  await letters.press("Space"); await expect(letters).toBeChecked();
+  await deadlines.press("Space"); await expect(deadlines).toBeChecked();
   const main = page.getByRole("button", { name: /What matters most right now/ });
   await expect(main).toContainText("Understand letters");
   await main.click();
@@ -72,8 +74,8 @@ for (const [priority, title, evidence] of scenarios) {
     await toExample(page, priority);
     await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Explain this sample" }).click();
-    await expect(page.getByRole("heading", { name: "In plain language" })).toBeFocused();
-    await expect(page.locator("mark[data-highlighted=true]")).toBeVisible();
+    await expect(page.getByRole("heading", { name: title, exact: true })).toBeFocused();
+    await expect(page.locator(".op-paper-highlight[data-highlighted=true]")).toBeVisible();
     await expect(page.getByText(evidence, { exact: true })).toBeVisible();
     await page.locator("textarea").fill("");
     await page.getByRole("button", { name: "Preview sample action" }).click();
@@ -87,7 +89,7 @@ for (const [priority, title, evidence] of scenarios) {
     await page.getByRole("button", { name: "Preview sample action" }).click();
     await page.getByRole("button", { name: "Confirm sample action" }).click();
     await expect(page.getByText("Sample confirmed", { exact: true })).toBeVisible();
-    await advance(page);
+    await page.getByRole("button", { name: "Continue to tools" }).click();
     await page.getByRole("button", { name: "Back", exact: true }).click();
     await expect(page.getByText(draft, { exact: true })).toBeVisible();
     await expect(page.getByText("Sample confirmed", { exact: true })).toBeVisible();
@@ -103,7 +105,7 @@ test("full preview makes no API, external, write, storage or popup side effects 
   });
   let popups = 0; page.on("popup", () => { popups++; });
   await toExample(page, "Prepare documents");
-  await page.getByRole("button", { name: "Skip example" }).click();
+  await page.getByRole("button", { name: "Skip this example" }).click();
   await page.getByRole("button", { name: "Preview Gmail setup" }).click();
   await expect(page.getByText("Permission preview", { exact: true })).toBeVisible();
   await expect(page.getByText(/cannot read or send email/)).toBeVisible();
@@ -115,10 +117,10 @@ test("full preview makes no API, external, write, storage or popup side effects 
   await expect(page.getByText("Connected", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "See my starting screen" }).click();
   await expect(page.getByRole("heading", { name: "A place to start, Ananya Rao" })).toBeVisible();
-  await expect(page.getByText("Gmail and Google Calendar selected for setup", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Try the sample" }).click();
+  await expect(page.getByText("Gmail, Google Calendar selected for setup", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Open my first example" }).click();
   await expect(page.getByRole("heading", { name: "A checklist with one item to clarify" })).toBeVisible();
-  await page.getByRole("button", { name: "Skip example" }).click();
+  await page.getByRole("button", { name: "Skip this example" }).click();
   await page.getByRole("button", { name: "Remove Gmail selection" }).click();
   await expect(page.getByRole("button", { name: "Preview Gmail setup" })).toBeFocused();
   await page.getByRole("button", { name: "Connect later" }).click();

@@ -20,7 +20,7 @@ export const needs = [
   { value: "updates", label: "Follow application updates", description: "Understand what has changed." },
 ] as const;
 export type Need = (typeof needs)[number]["value"];
-export type Tool = "gmail" | "calendar";
+export type { Tool } from "./providers";
 export type Answers = { name: string; language: string; reason: string; stage: string; city: string; office: string; needs: Need[]; main: Need | "" };
 export const emptyAnswers = (): Answers => ({ name: "", language: "en", reason: "", stage: "", city: "", office: "", needs: [], main: "" });
 export const officeRelevant = (stage: string) => ["Preparing an application", "Waiting for a decision", "Renewing"].includes(stage);
@@ -68,7 +68,7 @@ export const samples: Record<Need, Sample> = {
   },
   updates: {
     title: "An update, without the guesswork", kind: "Sample application timeline",
-    before: "12 November 2026 · status changed to ", evidence: "Documents received", after: ". No decision is shown.",
+    before: "2 November 2026 · status changed to ", evidence: "Documents received", after: ". No decision is shown.",
     evidenceLabel: "Status in the source", explanation: "This sample confirms receipt of documents. It does not say that a decision has been made. Keep the original update and check for any separate instructions.",
     actionLabel: "Your sample follow-up note", action: "Keep the “Documents received” update with its date. Check the original message for any additional requests before deciding whether to follow up.",
     firstAction: "Review your latest update", plan: ["Choose an update you want to understand", "Separate confirmed changes from unknowns", "Keep any follow-up linked to its source"],
@@ -79,6 +79,6 @@ export const steps = [
   { label: "Your details", title: "Let’s make this feel like yours", description: "A little context helps Dossierly start in the right place." },
   { label: "Your situation", title: "Where are you in your journey?", description: "There’s no perfect answer. Choose what feels closest today." },
   { label: "Your priorities", title: "What would make things easier?", description: "Choose the help you need. We’ll start with what matters most." },
-  { label: "Try an example", title: "See your next step more clearly", description: "Try a short sample based on your main priority." },
-  { label: "Optional tools", title: "Keep useful things together", description: "Preview two optional connections, or leave them for later." },
+  { label: "Your examples", title: "From the original to your next step", description: "Explore every kind of help you chose, starting with your main priority." },
+  { label: "Optional tools", title: "Bring your useful things together", description: "One mail provider. One calendar. Both optional, and both still a setup preview." },
 ];

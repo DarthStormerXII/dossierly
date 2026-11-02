@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { OnboardingPreview } from "@/components/onboarding-preview/OnboardingPreview";
 import "./preview.css";
+import "./workbench.css";
+import "./chat.css";
 
 export const metadata: Metadata = {
   title: "Onboarding preview",

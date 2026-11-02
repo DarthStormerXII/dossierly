@@ -1,0 +1,56 @@
+{
+  "purpose": "Provider identification in clearly labeled,exclusive mail/calendar previews.No active integration,endorsement or affiliation claimed.",
+  "GoogleBrandReference": "https://knowledge.workspace.google.com/admin/getting-started/brand-your-internal-communications-with-google-workspace",
+  "MicrosoftBrandReference": "https://developer.microsoft.com/en-us/fluentui#/styles/web/office-brand-icons",
+  "assets": [
+    {
+      "provider": "gmail",
+      "file": "gmail.png",
+      "source": "https://workspace.google.com/static/img/products/png/gmail.png",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "e5902f75923c775dcf86f453ab89be81441dbb6e47271642cf4ddc55775e42e0",
+      "transformation": "none;source bytes mirrored unchanged"
+    },
+    {
+      "provider": "calendar",
+      "file": "google-calendar.png",
+      "source": "https://workspace.google.com/static/img/products/png/calendar.png",
+      "width": 1024,
+      "height": 1024,
+      "sha256": "cd5f9a4c8d975d2abc80d329065bd1e2c7c73df214c28cf6dd7d146f1eb9aa85",
+      "transformation": "none;source bytes mirrored unchanged"
+    },
+    {
+      "provider": "outlook",
+      "file": "outlook.png",
+      "source": "https://static2.sharepointonline.com/files/fabric-cdn-prod_20200430.002/assets/brand-icons/product/png/outlook_48x1.png",
+      "width": 48,
+      "height": 48,
+      "sha256": "fe67170a0d546a9dc74d49e4686f9bd4721212c1e495b68a10d92d16e6016518",
+      "transformation": "none;source bytes mirrored unchanged"
+    },
+    {
+      "provider": "microsoft-calendar",
+      "file": "microsoft-calendar.png",
+      "source": "https://static2.sharepointonline.com/files/fabric-cdn-prod_20200430.002/assets/brand-icons/product/png/outlook_48x1.png",
+      "width": 48,
+      "height": 48,
+      "sha256": "fe67170a0d546a9dc74d49e4686f9bd4721212c1e495b68a10d92d16e6016518",
+      "transformation": "none;source bytes mirrored unchanged",
+      "note": "Official Outlook brand artwork for Microsoft Calendar (Outlook calendar),unaltered;this is not a separate implemented connector."
+    },
+    {
+      "provider": "apple-calendar",
+      "file": "apple-calendar.png",
+      "source": "https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/ca/5a/cd/ca5acd85-c64d-f468-00f9-50fdc4819e59/calendarCalistoga-0-0-1x_U007epad-0-1-0-85-220.png/512x512bb.png",
+      "officialListing": "https://apps.apple.com/us/app/calendar/id1108185179",
+      "officialLookup": "https://itunes.apple.com/lookup?id=1108185179",
+      "width": 512,
+      "height": 512,
+      "sha256": "db90174d1e96eb77f3e62d59db01a4b6d29fad0f52d9c2e85eab61c56ecca279",
+      "transformation": "none;officialAppleCDNPNGresponsemirroredunchanged",
+      "note": "AppleCalendarappartwork;prototypepreviewsfilehandoff,notimplementedOAuthorsync"
+    }
+  ]
+}

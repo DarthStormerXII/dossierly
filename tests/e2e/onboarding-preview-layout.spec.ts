@@ -41,7 +41,10 @@ for (const width of [390, 820, 1440]) {
       await page.getByRole("button", { name: "Confirm sample action" }).click();
       await checkGeometry(page);
       await expect(page.getByText("ஒரு நேரத்தில் ஒரு படி.", { exact: true })).toBeVisible();
-      await advance(page);
+      await page.getByRole("button", { name: "Next example" }).click();
+      await expect(page.locator(".op-walkthrough")).toHaveAttribute("data-demo", "communicate");
+      await checkGeometry(page);
+      await page.getByRole("button", { name: "Skip this example" }).click();
       await checkGeometry(page);
       await page.getByRole("button", { name: "Preview Gmail setup" }).click();
       await checkGeometry(page);
@@ -49,10 +52,26 @@ for (const width of [390, 820, 1440]) {
       await page.getByRole("button", { name: "Preview Google Calendar setup" }).click();
       await checkGeometry(page);
       await page.getByRole("button", { name: "Select Google Calendar for setup" }).click();
+      await expect(page.locator(".op-tool-logo")).toHaveCount(5);
+      for (const image of await page.locator(".op-tool-logo").all()) {
+        await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+        expect(await image.evaluate((img: HTMLImageElement) => ({ fit: getComputedStyle(img).objectFit, ratio: img.width / img.height, filter: getComputedStyle(img).filter }))).toEqual({ fit: "contain", ratio: 1, filter: "none" });
+      }
+      await checkGeometry(page);
       await page.getByRole("button", { name: "See my starting screen" }).click();
       await expect(page.locator(".op-preview")).toHaveAttribute("data-step", "6");
       await checkGeometry(page);
       await expect(page.getByText(/No account, case or connection has been created/)).toBeVisible();
+      await page.getByRole("button", { name: "Bring a question", exact: true }).click();
+      await page.getByLabel("Paste your question").fill("Could you help me understand this letter? ".repeat(35));
+      await page.getByRole("button", { name: "Attach sample source", exact: true }).click();
+      await choose(page, "Sample source context", "Sample phrase · Polish");
+      await checkGeometry(page);
+      await page.getByRole("button", { name: "Review question", exact: true }).click();
+      await checkGeometry(page);
+      await page.getByRole("button", { name: "Add to preview chat", exact: true }).click();
+      await page.getByRole("button", { name: "Show a sample response", exact: true }).click();
+      await checkGeometry(page);
     });
   }
 }
