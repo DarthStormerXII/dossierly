@@ -103,6 +103,8 @@
 .auth-email-form { display: grid; gap: 14px; min-width: 0; }
 .auth-email-form p { margin: 0; }
 .auth-email-form .input { width: 100%; min-width: 0; }
+.auth-code-field { justify-items: center; text-align: center; }
+#code-help { text-align: center; }
 .auth-code-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
 .auth-code-actions .btn { min-height: 40px; padding: 0; }
 /* ReUI c-input-otp-5 pattern, extended to Dossierly's six-digit codes. */

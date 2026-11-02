@@ -90,7 +90,7 @@ export function EmailCodeForm({ heading, onVerified }: { heading: string; onVeri
       </div>
       {challenge ? (
         <>
-          <div className="field" data-invalid={!!error} data-disabled={busy !== null || spent || expired}>
+          <div className="field auth-code-field" data-invalid={!!error} data-disabled={busy !== null || spent || expired}>
             <label htmlFor="auth-code">Six-digit code</label>
             <InputOTP ref={codeInput} id="auth-code" name="code" inputMode="numeric"
               autoComplete="one-time-code" pattern={REGEXP_ONLY_DIGITS} maxLength={6} required value={code}
