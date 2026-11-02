@@ -14,7 +14,7 @@
     "smoke": "tsx scripts/smoke.ts",
     "build:cf": "opennextjs-cloudflare build",
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy:cf": "opennextjs-cloudflare build && wrangler deploy",
+    "deploy:cf": "opennextjs-cloudflare build && wrangler deploy worker/index.ts --config wrangler.jsonc --name settla-app --no-autoconfig --keep-vars",
     "qa:build": "opennextjs-cloudflare build --env qa",
     "qa:deploy": "wrangler deploy worker/index.ts --config wrangler.jsonc --env qa --no-autoconfig --keep-vars",
     "qa:migrate": "wrangler d1 migrations apply DB --config wrangler.jsonc --remote --env qa",

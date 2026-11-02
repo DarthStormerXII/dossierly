@@ -53,7 +53,8 @@
     }
   },
   "vars": {
-    "APP_ENV": "preview",
+    "APP_ENV": "production",
+    "APP_URL": "https://dossierly.pages.dev",
     "DODO_ENV": "test",
     "DODO_PRODUCT_CASE_PASS": "pdt_0Nqo8xdjjAa1SQUGHKfZ7",
     "DODO_PRODUCT_CREDITS_10": "pdt_0Nqo8xo9gXhejHssrLeSZ",

@@ -5,6 +5,15 @@ const config = JSON.parse(readFileSync(new URL("../../wrangler.jsonc", import.me
 const qa = config.env.qa;
 
 describe("Cloudflare QA environment isolation", () => {
+  it("retains the production entry and exact public auth origin", () => {
+    expect(config.name).toBe("settla-app");
+    expect(config.main).toBe("worker/index.ts");
+    expect(config.vars.APP_ENV).toBe("production");
+    expect(config.vars.APP_URL).toBe("https://dossierly.pages.dev");
+    expect(config.vars.MODELS_DISABLED).toBeUndefined();
+    expect(config.services).toEqual([{ binding: "WORKER_SELF_REFERENCE", service: "settla-app" }]);
+  });
+
   it("uses a separate Worker and self-reference", () => {
     expect(qa.name).not.toBe(config.name);
     expect(qa.services).toEqual([{ binding: "WORKER_SELF_REFERENCE", service: qa.name }]);

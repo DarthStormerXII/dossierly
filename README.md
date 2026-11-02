@@ -114,7 +114,12 @@ npm run deploy:cf              # build with OpenNext and deploy the Worker (wran
 
 The bridge (`bridge/`) runs on a machine with NVIDIA NemoClaw installed; see `bridge/ops/`. The Guardrails audit job is in `jobs/guardrails-audit/` (`launch.sh` starts it with the Nebius CLI).
 
-### Cloudflare QA
+### Correction review and Cloudflare QA
+
+Each correction is reviewed on its own owned localhost build, linked at the top of its
+correction conversation. Handle actual provider origin restrictions when encountered.
+The hosted QA environment below remains available for Cloudflare-specific checks;
+it is not the default per-correction review target.
 
 The durable integration preview is [dossierly-qa.gabrielaxy.workers.dev](https://dossierly-qa.gabrielaxy.workers.dev).
 The named `qa` environment in `wrangler.jsonc` uses a separate Worker, EU D1 database,
@@ -136,8 +141,9 @@ be registered for this QA host separately from production.
 
 Model calls are disabled and payment credentials are not provisioned in QA. Browser rendering,
 email authentication and free-account flows can be checked without inference or live charges.
-Use correction worktrees for independent code, then integrate compatible checkpoints into
-this product QA preview. Publish production only after Gabriel explicitly approves the target.
+Use correction worktrees for independent code and agent-owned scoped integration to main.
+Publish production only after Gabriel explicitly approves the target. Production uses the
+custom `worker/index.ts` entry, its existing resources/secrets, and the exact public `APP_URL`.
 
 ## Operator and licence
 
