@@ -38,6 +38,6 @@ const GLOSSARY_ROWS: Array<[string, Record<"uk" | "hi" | "ta", string>]> = [
 ];
 
 export function glossaryFor(language: Language): string {
-  if (language === "en") return "";
+  if (language !== "uk" && language !== "hi" && language !== "ta") return "";
   return `Preferred terms (Polish = ${langName(language)}): ${GLOSSARY_ROWS.map(([pl, t]) => `${pl} = ${t[language]}`).join("; ")}.`;
 }

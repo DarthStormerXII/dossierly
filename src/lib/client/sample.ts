@@ -64,6 +64,10 @@ export function emptyCase(name: string, language: Language, office: string): Cas
 
 export const LANGUAGE_NAMES: Record<Language, { label: string; native: string; speech: string }> = {
   en: { label: "English", native: "English", speech: "en-GB" },
+  ru: { label: "Russian", native: "Русский", speech: "ru-RU" },
+  zh: { label: "Chinese", native: "中文", speech: "zh-CN" },
+  ja: { label: "Japanese", native: "日本語", speech: "ja-JP" },
+  vi: { label: "Vietnamese", native: "Tiếng Việt", speech: "vi-VN" },
   uk: { label: "Ukrainian", native: "Українська", speech: "uk-UA" },
   hi: { label: "Hindi", native: "हिन्दी", speech: "hi-IN" },
   ta: { label: "Tamil", native: "தமிழ்", speech: "ta-IN" },

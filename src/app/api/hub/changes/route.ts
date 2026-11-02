@@ -13,7 +13,9 @@ export async function GET(request: Request) {
   try {
     const q = Query.safeParse(Object.fromEntries(new URL(request.url).searchParams));
     if (!q.success) return jsonError(400, "Only country=pl is supported", "invalid_request");
-    return NextResponse.json({ country: q.data.country, changes: await mergedChanges(getEnv(), 30) });
+    const env = getEnv();
+    const latest = await env.DB.prepare("SELECT MAX(fetched_at) AS checked FROM hub_snapshots WHERE country = ?").bind(q.data.country).first<{ checked: number | null }>();
+    return NextResponse.json({ country: q.data.country, changes: await mergedChanges(env, 30), kind: "official_pages", personalApplicationStatus: false, checkedAt: latest?.checked ? new Date(latest.checked).toISOString() : null });
   } catch (e) {
     return errorResponse(e);
   }

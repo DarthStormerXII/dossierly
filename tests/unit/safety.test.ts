@@ -27,6 +27,6 @@ describe("safety guard", () => {
 
   it("has a notice in every language that says it only interprets", () => {
     expect(SAFETY_NOTICE.en).toMatch(/only interpret/i);
-    expect(Object.keys(SAFETY_NOTICE).sort()).toEqual(["en", "hi", "ta", "uk"]);
+    expect(Object.keys(SAFETY_NOTICE).sort()).toEqual(["en", "hi", "ja", "ru", "ta", "uk", "vi", "zh"]);
   });
 });

@@ -9,6 +9,7 @@ const shortDate = (iso: string) => {
 /** First-time memory file for an agent that has never seen this person, rendered from the app's case. */
 export function renderCaseMemory(c: CaseContext): string {
   const lines = [`# Case Memory - ${c.profile.name}`, "", `**Case:** ${c.office}${c.caseNumber ? `, ${c.caseNumber}` : ""}`, "", "**Timeline:**"];
+  if (c.context) lines.splice(4, 0, `**Situation (user-confirmed):** ${JSON.stringify(c.context)}`, "");
   const events = [...c.events].sort((a, b) => a.date.localeCompare(b.date));
   if (events.length === 0) lines.push("- (no events yet)");
   for (const e of events) lines.push(`- ${shortDate(e.date)}: ${e.title}${e.summary ? ` - ${e.summary}` : ""}`);

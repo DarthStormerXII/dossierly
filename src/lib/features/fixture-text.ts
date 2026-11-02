@@ -1,8 +1,7 @@
 /* RECORDED FIXTURES. SAMPLE data (Arjun Raman, WSC-II-P.6151.48213.2026), hand-written stand-ins for model output.
    Used for local replay only (APP_ENV=local, no key, DEMO_FIXTURES=1) and in tests; never served in production. */
-import type { Language } from "../schemas";
-
-export type ByLang<T = string> = Record<Language, T>;
+export type RecordedLanguage = "en" | "uk" | "hi" | "ta";
+export type ByLang<T = string> = Record<RecordedLanguage, T>;
 
 export const OFFICIAL_LINES: Array<{ pl: string; tr: ByLang }> = [
   {

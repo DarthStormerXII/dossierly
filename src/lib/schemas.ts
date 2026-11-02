@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const LANGUAGES = ["en", "uk", "hi", "ta"] as const;
+export const LANGUAGES = ["en", "uk", "ru", "hi", "ta", "zh", "ja", "vi"] as const;
 export type Language = (typeof LANGUAGES)[number];
 export const LanguageSchema = z.enum(LANGUAGES);
 
@@ -40,6 +40,7 @@ export const CaseSchema = z.object({
   id: text(80),
   country: z.literal("pl").default("pl"),
   type: z.string().default("temporary_residence_work"),
+  context: z.object({ reason: text(80), stage: text(120), city: optText(120) }).optional(),
   office: text(160),
   caseNumber: optText(80),
   profile: z.object({ name: text(120), language: LanguageSchema, addresses: z.array(text(200)).max(5).optional() }),

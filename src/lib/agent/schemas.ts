@@ -11,7 +11,7 @@ export const TaskKindSchema = z.enum(TASK_KINDS);
 export type TaskKind = z.infer<typeof TaskKindSchema>;
 
 const str = (max: number) => z.string().trim().min(1).max(max);
-const LanguageSchema = z.enum(["en", "uk", "hi", "ta"]);
+const LanguageSchema = z.enum(["en", "uk", "ru", "hi", "ta", "zh", "ja", "vi"]);
 const IsoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 /** The client-owned case, as sent per request (see docs/BUILD.md). Extra fields pass through. */
@@ -20,7 +20,8 @@ export const CaseContextSchema = z
     id: str(80),
     office: str(160),
     caseNumber: z.string().max(80).optional(),
-    profile: z.object({ name: str(120), language: LanguageSchema }).passthrough(),
+    context: z.object({ reason: str(80), stage: str(120), city: z.string().max(120).optional() }).optional(),
+    profile: z.object({ name: str(120), language: LanguageSchema, addresses: z.array(str(200)).max(5).optional() }).passthrough(),
     events: z
       .array(
         z.object({

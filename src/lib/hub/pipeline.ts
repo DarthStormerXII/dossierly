@@ -72,8 +72,8 @@ export async function mergedChanges(env: Env, limit = 20): Promise<HubChange[]> 
     rows = [];
   }
   const ids = new Set(rows.map((r) => r.id));
-  const seed = seedChanges.filter((c) => !ids.has(c.id)).map((c) => ({ ...c, sample: c.sample ?? false }));
-  return [...rows, ...seed].sort((a, b) => b.detectedAt.localeCompare(a.detectedAt)).slice(0, limit);
+  const seed = seedChanges.filter((c) => !ids.has(c.id) && !c.sample).map((c) => ({ ...c, sample: false }));
+  return [...rows.filter((r) => !r.sample), ...seed].sort((a, b) => b.detectedAt.localeCompare(a.detectedAt)).slice(0, limit);
 }
 
 export async function buildHubContext(

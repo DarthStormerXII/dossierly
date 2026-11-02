@@ -133,6 +133,10 @@ export function guardUserUtterance(text: string, modelFlag = false): SafetyVerdi
 }
 
 export const SAFETY_NOTICE: Record<Language, string> = {
+  ru: "Я могу только переводить, а не давать медицинские или юридические советы. Вопрос передан дословно: уточните его у сотрудника учреждения или врача.",
+  zh: "我只能翻译，不能提供医疗或法律建议。您的问题已按原意转达，请向工作人员或医生确认。",
+  ja: "私は通訳のみを行い、医療・法律の助言はできません。質問はそのまま訳しました。担当者や医師に確認してください。",
+  vi: "Tôi chỉ phiên dịch, không cung cấp tư vấn y tế hay pháp lý. Câu hỏi đã được dịch nguyên ý; hãy hỏi cán bộ hoặc bác sĩ.",
   uk: "Я лише перекладаю. Я не можу давати медичні чи юридичні поради. Ваше запитання передано дослівно: будь ласка, запитайте посадовця або лікаря.",
   en: "I can only interpret. I cannot give medical or legal advice. Your question was passed on word for word: please ask the official or the doctor.",
   hi: "मैं केवल अनुवाद कर सकता हूँ। मैं चिकित्सा या कानूनी सलाह नहीं दे सकता। आपका प्रश्न शब्दशः आगे बता दिया गया है: कृपया अधिकारी या डॉक्टर से पूछें।",

@@ -69,6 +69,10 @@ export const LANGUAGE_META: Record<
   uk: { label: "Ukrainian", native: "Українська", english: "Ukrainian", recognition: "uk-UA", speech: "uk-UA" },
   hi: { label: "Hindi", native: "हिन्दी", english: "Hindi", recognition: "hi-IN", speech: "hi-IN" },
   ta: { label: "Tamil", native: "தமிழ்", english: "Tamil", recognition: "ta-IN", speech: "ta-IN" },
+  ru: { label: "Russian", native: "Русский", english: "Russian", recognition: "ru-RU", speech: "ru-RU" },
+  zh: { label: "Chinese", native: "中文", english: "Chinese", recognition: "zh-CN", speech: "zh-CN" },
+  ja: { label: "Japanese", native: "日本語", english: "Japanese", recognition: "ja-JP", speech: "ja-JP" },
+  vi: { label: "Vietnamese", native: "Tiếng Việt", english: "Vietnamese", recognition: "vi-VN", speech: "vi-VN" },
 };
 
 export const POLISH = { recognition: "pl-PL", speech: "pl-PL" };

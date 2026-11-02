@@ -62,7 +62,7 @@ function caseContext(c: Case): string {
   const events = c.events.map((e) => `${e.id} | ${e.date} | ${e.kind} | ${e.title}: ${e.summary}`).join("\n") || "(none)";
   const docs = c.documents.map((d) => `${d.have ? "HAVE" : "MISSING"}: ${d.name}`).join("\n") || "(none)";
   const deadlines = c.deadlines.map((d) => `${d.date}: ${d.what}`).join("\n") || "(none)";
-  return `Office: ${c.office}\nCase number: ${c.caseNumber ?? "unknown"}\nApplicant: ${c.profile.name}\nEVENTS (id | date | kind | title: summary)\n${events}\nDOCUMENTS\n${docs}\nKNOWN DEADLINES\n${deadlines}`;
+  return `Office: ${c.office}\nCase number: ${c.caseNumber ?? "unknown"}\nApplicant: ${c.profile.name}\nSituation (user-confirmed): ${JSON.stringify(c.context ?? {})}\nEVENTS (id | date | kind | title: summary)\n${events}\nDOCUMENTS\n${docs}\nKNOWN DEADLINES\n${deadlines}`;
 }
 
 export async function linkLetter(ctx: Ctx, r: LettersLinkRequest) {

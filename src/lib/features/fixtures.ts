@@ -10,6 +10,15 @@ import {
   WRAP,
 } from "./fixture-text";
 import type { Issue, LinkModelOut, Wrap } from "./outputs";
+import type { ByLang } from "./fixture-text";
+import { ModelError } from "../model/types";
+
+function recorded<T>(values: ByLang<T>, language: Language): T {
+  if (language !== "en" && language !== "uk" && language !== "hi" && language !== "ta") {
+    throw new ModelError("No recorded fixture exists for this language. Use the live service.", "model_unavailable", 503);
+  }
+  return values[language];
+}
 
 const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
 const NO_FIXTURE = "[replay: no recorded translation]";
@@ -25,7 +34,7 @@ export function interpretFixture(speaker: "user" | "official", text: string, lan
   const t = norm(text);
   if (speaker === "official") {
     const hit = OFFICIAL_LINES.find((l) => norm(l.pl) === t);
-    return { translation: hit ? hit.tr[language] : `${NO_FIXTURE} ${text}`, advice: false };
+    return { translation: hit ? recorded(hit.tr, language) : `${NO_FIXTURE} ${text}`, advice: false };
   }
   const hit = USER_LINES.find((l) => l.keys.some((k) => norm(k) === t));
   return { translation: hit ? hit.pl : `${NO_FIXTURE} ${text}`, advice: hit?.advice ?? false };
@@ -39,9 +48,9 @@ export function watchFixture(turns: TurnInput[], language: Language): { issues: 
         {
           kind: CLARIFY_14_NOV.kind,
           quote: CLARIFY_14_NOV.quote,
-          explanation: CLARIFY_14_NOV.explanation[language],
+          explanation: recorded(CLARIFY_14_NOV.explanation, language),
           clarifyLocal: CLARIFY_14_NOV.clarifyLocal,
-          clarifyUser: CLARIFY_14_NOV.clarifyUser[language],
+          clarifyUser: recorded(CLARIFY_14_NOV.clarifyUser, language),
         },
       ],
     };
@@ -50,7 +59,7 @@ export function watchFixture(turns: TurnInput[], language: Language): { issues: 
 }
 
 export function wrapFixture(language: Language): Wrap {
-  const w = WRAP[language];
+  const w = recorded(WRAP, language);
   return {
     headline: w.headline,
     agreed: w.agreed,
@@ -61,7 +70,7 @@ export function wrapFixture(language: Language): Wrap {
 }
 
 export function letterFixture(_req: LettersReadRequest, language: Language) {
-  const l = LETTER[language];
+  const l = recorded(LETTER, language);
   return {
     readable: true,
     transcript:
@@ -88,7 +97,7 @@ export function letterFixture(_req: LettersReadRequest, language: Language) {
 }
 
 export function linkFixture(req: LettersLinkRequest): LinkModelOut {
-  const l = LINK[req.language];
+  const l = recorded(LINK, req.language);
   const related = req.case.events.filter((e) => e.kind === "appointment" || e.date <= req.deliveryDate).slice(-2).map((e) => e.id);
   return {
     relatedEventIds: related,

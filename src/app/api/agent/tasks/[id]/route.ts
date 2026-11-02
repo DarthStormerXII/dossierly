@@ -3,6 +3,8 @@ import { advanceTask } from "@/lib/agent/service";
 import { getEnv } from "@/lib/server/env";
 import { ApiError, errorResponse } from "@/lib/server/http";
 import { requireUser } from "@/lib/server/session";
+import { sameOrigin } from "@/lib/server/request";
+import { cancelTask } from "@/lib/agent/cancel";
 
 export const dynamic = "force-dynamic";
 
@@ -18,4 +20,14 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   } catch (e) {
     return errorResponse(e);
   }
+}
+
+export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  try {
+    const env = getEnv(); sameOrigin(req, env);
+    const { accountId } = await requireUser(req);
+    const { id } = await ctx.params;
+    await cancelTask(env, id, accountId);
+    return Response.json({ stopped: true }, { headers: { "cache-control": "no-store" } });
+  } catch (error) { return errorResponse(error); }
 }

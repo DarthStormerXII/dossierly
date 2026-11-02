@@ -50,6 +50,11 @@ export type Env = {
   RESEND_API_KEY?: string;
   /** Bare verified sender selected for this environment. QA may use the shared mail service. */
   EMAIL_FROM?: string;
+  COMPOSIO_API_KEY?: string;
+  COMPOSIO_PROJECT_ID?: string;
+  COMPOSIO_GMAIL_AUTH_CONFIG_ID?: string;
+  COMPOSIO_OUTLOOK_AUTH_CONFIG_ID?: string;
+  COMPOSIO_GOOGLECALENDAR_AUTH_CONFIG_ID?: string;
   DODO_PAYMENTS_API_KEY: string;
   DODO_WEBHOOK_KEY: string;
   JUDGE_CODE: string;
@@ -70,6 +75,7 @@ const STRING_KEYS = [
   "DODO_PAYMENTS_API_KEY", "DODO_WEBHOOK_KEY", "JUDGE_CODE", "DODO_PRODUCT_CASE_PASS",
   "DODO_PRODUCT_CREDITS_10", "DODO_PRODUCT_CREDITS_25", "DODO_PRODUCT_FAMILY", "APP_URL",
   "RESEND_API_KEY", "EMAIL_FROM",
+  "COMPOSIO_API_KEY", "COMPOSIO_PROJECT_ID", "COMPOSIO_GMAIL_AUTH_CONFIG_ID", "COMPOSIO_OUTLOOK_AUTH_CONFIG_ID", "COMPOSIO_GOOGLECALENDAR_AUTH_CONFIG_ID",
 ] as const;
 
 function readCloudflare(): Partial<Env> | null {

@@ -1,5 +1,5 @@
 /** Shared by the Worker fallback and the M2 bridge; no imports so Node can strip types and run it. */
-export const LANGUAGE_NAMES = { en: "English", uk: "Ukrainian", hi: "Hindi", ta: "Tamil" } as const;
+export const LANGUAGE_NAMES = { en: "English", uk: "Ukrainian", ru: "Russian", hi: "Hindi", ta: "Tamil", zh: "Chinese", ja: "Japanese", vi: "Vietnamese" } as const;
 
 export function fillPrompt(template: string, language: keyof typeof LANGUAGE_NAMES): string {
   return template.replaceAll("{{LANGUAGE}}", LANGUAGE_NAMES[language] ?? "English");

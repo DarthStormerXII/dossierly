@@ -12,8 +12,8 @@ import type { PrepareRequest } from "../schemas";
  */
 export async function prepare(ctx: Ctx, r: PrepareRequest) {
   const userId = ctx.userId ?? "";
-  const hub = await buildHubContext(ctx.env, { userId, appointment: r.appointment, language: r.language });
   const masker = maskerFor({ name: r.case.profile.name, addresses: r.case.profile.addresses, caseNumber: r.case.caseNumber });
+  const hub = await buildHubContext(ctx.env, { userId, appointment: masker.maskDeep(r.appointment), language: r.language });
   const { taskId } = await enqueueAgentTask(ctx.env, {
     userId,
     kind: "prepare",

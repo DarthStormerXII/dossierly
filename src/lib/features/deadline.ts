@@ -7,6 +7,7 @@
  * guess a number the letter does not state. The result is a calculation, not legal advice.
  */
 import type { DeadlineRule, Language } from "../schemas";
+import { extraDeadlineCopy } from "./deadline-copy";
 
 export interface Deadline {
   date: string;
@@ -54,7 +55,7 @@ export const isWorkingDay = (d: Date) => {
   return wd !== 0 && wd !== 6 && !polishHolidays(d.getUTCFullYear()).has(iso(d));
 };
 
-const LOCALE: Record<Language, string> = { en: "en-GB", uk: "uk-UA", hi: "hi-IN", ta: "ta-IN" };
+const LOCALE: Record<Language, string> = { en: "en-GB", uk: "uk-UA", ru: "ru-RU", hi: "hi-IN", ta: "ta-IN", zh: "zh-CN", ja: "ja-JP", vi: "vi-VN" };
 const fmt = (d: Date, lang: Language) =>
   new Intl.DateTimeFormat(LOCALE[lang], { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(d);
 
@@ -114,8 +115,9 @@ export function computeDeadline(i: DeadlineInput): Deadline | null {
   if (rule.days === null || rule.from === null) return null;
   const baseIso = rule.from === "delivery" ? i.deliveryDate : i.letterDate;
   if (!baseIso || !/^\d{4}-\d{2}-\d{2}$/.test(baseIso)) return null;
-  const t = T[language];
+  const t = { ...T, ...extraDeadlineCopy }[language];
   const base = parse(baseIso);
+  if (Number.isNaN(base.getTime()) || iso(base) !== baseIso) return null;
   const last = addDays(base, rule.days);
   const steps = [t.base(t.from[rule.from], fmt(base, language)), t.rule(rule.days, rule.quote), t.count(fmt(addDays(base, 1), language), rule.days, fmt(last, language))];
   let final = last;
