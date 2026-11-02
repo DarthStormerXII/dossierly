@@ -105,5 +105,16 @@
 .auth-email-form .input { width: 100%; min-width: 0; }
 .auth-code-actions { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
 .auth-code-actions .btn { min-height: 40px; padding: 0; }
-.auth-code { font-size: 1.375rem; letter-spacing: 0.3em; font-variant-numeric: tabular-nums; }
+/* ReUI c-input-otp-5 pattern, extended to Dossierly's six-digit codes. */
+.otp-container { display: flex; width: fit-content; max-width: 100%; position: relative; }
+.otp-container:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
+.otp-group { display: flex; align-items: center; }
+.otp-slot { position: relative; display: grid; place-items: center; width: clamp(36px, 10vw, 48px); height: 52px; border: 1px solid var(--line); border-left: 0; background: var(--surface); color: var(--ink); font-size: 1.375rem; font-variant-numeric: tabular-nums; }
+.otp-slot:first-child { border-left: 1px solid var(--line); border-radius: 8px 0 0 8px; }
+.otp-slot:last-child { border-radius: 0 8px 8px 0; }
+.otp-slot[data-active="true"] { z-index: 1; outline: 2px solid var(--focus); outline-offset: 2px; }
+.field[data-invalid="true"] .otp-slot { border-color: var(--danger, #b42318); }
+.otp-caret { width: 1px; height: 24px; background: currentColor; animation: otp-blink 1s step-end infinite; }
+@keyframes otp-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .otp-caret { animation: none; } }
 #auth-feedback:empty { display: none; }

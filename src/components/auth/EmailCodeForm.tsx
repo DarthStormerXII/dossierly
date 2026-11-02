@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { verifyEmailCode } from "@/lib/client/api";
 import { emailError, emailSchema, requestEmailCode } from "@/lib/client/email-auth";
 
@@ -77,17 +79,18 @@ export function EmailCodeForm({ heading, onVerified }: { heading: string; onVeri
       </div>
       {challenge ? (
         <>
-          <label className="field">
-            <span>Six-digit code</span>
-            <input ref={codeInput} className="input auth-code" name="code" type="text" inputMode="numeric"
-              autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={code}
-              onChange={(event) => { setCode(event.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
-              onPaste={(event) => {
-                const pasted = event.clipboardData.getData("text").replace(/[\s-]/g, "");
-                if (/^\d{6}$/.test(pasted)) { event.preventDefault(); setCode(pasted); setError(""); }
-              }}
-              disabled={busy !== null || spent || expired} aria-describedby="auth-recipient code-help auth-feedback" aria-invalid={!!error} />
-          </label>
+          <div className="field" data-invalid={!!error} data-disabled={busy !== null || spent || expired}>
+            <label htmlFor="auth-code">Six-digit code</label>
+            <InputOTP ref={codeInput} id="auth-code" name="code" inputMode="numeric"
+              autoComplete="one-time-code" pattern={REGEXP_ONLY_DIGITS} maxLength={6} required value={code}
+              onChange={(value) => { setCode(value); setError(""); }}
+              pasteTransformer={(value) => value.replace(/[\s-]/g, "")}
+              disabled={busy !== null || spent || expired} aria-describedby="auth-recipient code-help auth-feedback" aria-invalid={!!error}>
+              <InputOTPGroup>
+                {Array.from({ length: 6 }, (_, index) => <InputOTPSlot key={index} index={index} />)}
+              </InputOTPGroup>
+            </InputOTP>
+          </div>
           <p id="code-help" className="tiny muted">{expired ? "This code has expired. Request a new one below." : "The code expires in 10 minutes."}</p>
           <button className="btn btn-primary btn-block" type="submit" disabled={busy !== null || spent || expired}>
             {busy === "verify" ? "Signing you in…" : "Verify and continue"}

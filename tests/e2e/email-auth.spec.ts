@@ -46,6 +46,14 @@ for (const width of [390, 820, 1440]) {
     await expect(page.getByLabel("Six-digit code")).toBeFocused();
     await expect(page.getByText(email, { exact: true })).toBeVisible();
     await expect(page.getByLabel("Six-digit code")).toHaveAttribute("autocomplete", "one-time-code");
+    await expect(page.locator('[data-slot="input-otp-slot"]')).toHaveCount(6);
+    const slots = await page.locator('[data-slot="input-otp-slot"]').evaluateAll((els) => els.map((el) => {
+      const { width, height } = el.getBoundingClientRect(); return { width, height };
+    }));
+    for (const slot of slots) {
+      expect(slot.width).toBeGreaterThanOrEqual(36);
+      expect(slot.height).toBeGreaterThanOrEqual(44);
+    }
     await page.getByRole("button", { name: "Verify and continue" }).click();
     await expect(page.locator(".auth-email-form").getByRole("alert")).toHaveText("Enter the six-digit code from your email.");
     const geometry = await page.locator(".auth-card").evaluate((card) => {
@@ -166,4 +174,21 @@ test("existing email sessions skip sign-in; earlier accounts can verify email", 
   await page.route("**/api/me", (route) => route.fulfill({ json: account }));
   await page.reload();
   await expect(page).toHaveURL(/\/app$/);
+});
+
+
+test("digit slots support leading zeros, keyboard editing and rejecting letters", async ({ page }) => {
+  await mockApi(page);
+  await requestCode(page);
+  const code = page.getByLabel("Six-digit code");
+  await code.pressSequentially("012345");
+  await expect(code).toHaveValue("012345");
+  await expect(page.locator('[data-slot="input-otp-slot"]').first()).toHaveText("0");
+  await code.press("ArrowLeft");
+  await code.press("Backspace");
+  await expect(code).toHaveValue("01235");
+  await code.pressSequentially("a");
+  await expect(code).toHaveValue("01235");
+  await code.fill("");
+  await expect(page.locator('[data-slot="input-otp-slot"]').first()).toHaveAttribute("data-active", "true");
 });
