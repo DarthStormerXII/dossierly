@@ -1,11 +1,12 @@
 import { ASR_MODEL, asrOnline } from "@/lib/server/asr";
 import { getBudgets } from "@/lib/server/budget";
 import { getEnv } from "@/lib/server/env";
+import { HEARTBEAT_ONLINE_MS } from "@/lib/server/heartbeat";
 import { errorResponse } from "@/lib/server/http";
 
 export const dynamic = "force-dynamic";
 
-const ONLINE_WINDOW_MS = 60_000;
+const ONLINE_WINDOW_MS = HEARTBEAT_ONLINE_MS;
 const MODELS = [
   { id: "nvidia/Nemotron-3_5-Lightning", role: "turns, guard, summaries" },
   { id: "nvidia/Nemotron-3.5-Super-VL", role: "agent, vision, watcher, drafts" },

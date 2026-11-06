@@ -1,12 +1,13 @@
 import { z } from "zod";
 import type { Env } from "./env";
+import { HEARTBEAT_ONLINE_MS, touchHeartbeat } from "./heartbeat";
 import { ApiError } from "./http";
 import { recordLedger } from "./ledger";
 import { randomId } from "./util";
 
 export const ASR_MODEL = "nvidia/parakeet-tdt-0.6b-v3";
-/** The bridge does not poll while it transcribes, and cold calls can take ~20 s, so allow a minute of silence. */
-export const ASR_ONLINE_MS = 60_000;
+/** The bridge does not poll while it transcribes (cold calls take ~20 s) and heartbeats are throttled; see heartbeat.ts. */
+export const ASR_ONLINE_MS = HEARTBEAT_ONLINE_MS;
 export const ASR_QUEUE_MS = 20_000;
 export const ASR_RUN_MS = 60_000;
 export const ASR_MAX_AUDIO = 1_000_000;
@@ -87,7 +88,7 @@ export async function getAsrJob(env: Env, userId: string, id: string, now = Date
 
 /** Marks the bridge online and atomically claims the oldest fresh queued job, or null. */
 export async function claimAsrJob(env: Env, now = Date.now()): Promise<{ id: string; lang: string; audio: string; translate: string | null } | null> {
-  await env.CACHE.put("asr:lastSeen", String(now));
+  await touchHeartbeat(env.CACHE, "asr:lastSeen", now);
   return env.DB.prepare(
     `UPDATE asr_jobs SET status='running', updated_at=?
      WHERE status='queued' AND id = (SELECT id FROM asr_jobs WHERE status='queued' AND created_at>=? ORDER BY created_at LIMIT 1)

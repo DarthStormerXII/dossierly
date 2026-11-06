@@ -1,6 +1,7 @@
 import { requireBridgeSecret } from "@/lib/agent/auth";
 import { claimNextTask } from "@/lib/agent/queue";
 import { getEnv } from "@/lib/server/env";
+import { putIfChanged, touchHeartbeat } from "@/lib/server/heartbeat";
 import { errorResponse } from "@/lib/server/http";
 
 export const dynamic = "force-dynamic";
@@ -11,8 +12,8 @@ export async function GET(req: Request) {
     requireBridgeSecret(req, env);
     const sandboxes = Number(req.headers.get("x-bridge-sandboxes"));
     await Promise.all([
-      env.CACHE.put("bridge:lastSeen", String(Date.now())),
-      Number.isInteger(sandboxes) && sandboxes >= 0 ? env.CACHE.put("bridge:sandboxes", String(sandboxes)) : Promise.resolve(),
+      touchHeartbeat(env.CACHE, "bridge:lastSeen"),
+      Number.isInteger(sandboxes) && sandboxes >= 0 ? putIfChanged(env.CACHE, "bridge:sandboxes", String(sandboxes)) : Promise.resolve(),
     ]);
     const row = await claimNextTask(env);
     if (!row) return Response.json({ task: null }, { headers: { "cache-control": "no-store" } });

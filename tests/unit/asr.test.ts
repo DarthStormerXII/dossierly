@@ -19,10 +19,10 @@ const code = async (p: Promise<unknown>) => {
 const online = (env: ReturnType<typeof freshLocalEnv>, now: number) => env.CACHE.put("asr:lastSeen", String(now));
 
 describe("asr jobs", () => {
-  it("is 503 asr_offline when the bridge has not been seen for a minute", async () => {
+  it("is 503 asr_offline when the bridge has not been seen for 90 seconds", async () => {
     const env = freshLocalEnv();
     expect(await code(createAsrJob(env, "u1", { audio: wav(), lang: "pl" }, 100_000))).toEqual([503, "asr_offline"]);
-    await online(env, 30_000);
+    await online(env, 5_000);
     expect(await code(createAsrJob(env, "u1", { audio: wav(), lang: "pl" }, 100_000))).toEqual([503, "asr_offline"]);
     await online(env, 90_000);
     expect(await code(createAsrJob(env, "u1", { audio: wav(), lang: "pl" }, 100_000))).toBeNull();
